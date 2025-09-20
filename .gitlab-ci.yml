@@ -1,0 +1,95 @@
+stages:
+  - test
+  - build
+  - deploy
+
+default:
+  tags:
+    - gcp-gitlab-runner
+
+variables:
+  PIXI_LOCKED: true
+  PIXI_VERSION: 0.52.0
+
+.pixi:
+  image: ghcr.io/prefix-dev/pixi:$PIXI_VERSION
+  before_script:
+    - apt-get update && apt-get install -y build-essential git curl jq
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+    - if: '$CI_COMMIT_TAG != null'
+    - if: $CI_COMMIT_REF_NAME != $CI_DEFAULT_BRANCH
+      when: never
+
+testing:
+  extends: .pixi
+  stage: test
+  parallel:
+    matrix:
+      - GDAL: [gdal38, gdal39, gdal310, gdal311]
+        PYSTAC_STAC_VERSION_OVERRIDE: ["1.0.0", "1.1.0"]
+  script:
+    - pixi run -e dev-$GDAL test --cov-report xml:coverage_${GDAL}_${PYSTAC_STAC_VERSION_OVERRIDE}.xml
+    - mv .coverage .coverage-${GDAL}-${PYSTAC_STAC_VERSION_OVERRIDE}
+  artifacts:
+    paths:
+        - .coverage-${GDAL}-${PYSTAC_STAC_VERSION_OVERRIDE}
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage_${GDAL}_${PYSTAC_STAC_VERSION_OVERRIDE}.xml
+    expire_in: 1 month
+
+
+test_coverage:
+  stage: build
+  needs: ["testing"]
+  image: python:3.13-slim
+  script:
+    - pip3 install coverage
+    - coverage combine .coverage*
+    - coverage report
+  coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE != "merge_request_event"
+      when: never
+
+lint:
+  stage: test
+  extends: .pixi
+  script:
+       - pixi run -e lint lint
+
+
+build:
+  stage: build
+  extends: .pixi
+  script:
+    - pixi run build-docs
+    - echo "The site will be deployed to $CI_PAGES_URL"
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+
+
+deploy-to-planet-pypi:
+  # Assumes the following environment variables from gitlab:
+  # - PLANET_PYPI_USERNAME
+  # - PLANET_PYPI_PASSWORD
+  # These are configured in Settings->CI/CD->Variables
+  stage: deploy
+  extends: .pixi
+  variables:
+    TWINE_REPOSITORY_URL: $PYPI_REPOSITORY_URL
+    TWINE_USERNAME: $PYPI_DEPLOY_USER
+    TWINE_PASSWORD: $PYPI_DEPLOY_KEY
+  script:
+    - pixi run -e build deploy
+  rules:
+    - if: '$CI_COMMIT_TAG != null'
+      variables:
+        GIT_SHA: $CI_COMMIT_TAG
