@@ -1,0 +1,238 @@
+[project]
+authors = [{ name = "Thomas Maschler", email = "thomas.maschler@planet.com" }]
+name = "rio-stac-io"
+requires-python = ">= 3.10"
+version = "0.1.0"
+dependencies = [
+    "rasterio>=1.4.3",
+    "pystac>=1.11.0",
+    "pystac-client>=0.9.0",
+
+]
+
+[project.optional-dependencies]
+gti = ["stac-geoparquet>=0.7.0",]
+
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64"]
+
+[tool.pixi.pypi-options]
+no-binary = ["rasterio"]
+
+[tool.pixi.pypi-dependencies]
+rio_stac_io = { path = ".", editable = true }
+
+[tool.pixi.environments]
+default = { features = ["gti"], solve-group = "default" }
+dev = { features = ["gti", "dev", "lint", "gdal-311"], solve-group = "gdal-311" }
+dev-gdal38 = { features = ["gti", "dev", "lint", "gdal-38"], solve-group = "gdal-38" }
+dev-gdal39 = { features = ["gti", "dev", "lint", "gdal-39"], solve-group = "gdal-39" }
+dev-gdal310 = { features = ["gti", "dev", "lint", "gdal-310"], solve-group = "gdal-310" }
+dev-gdal311 = { features = ["gti", "dev", "lint", "gdal-311"], solve-group = "gdal-311" }
+lint = { features = ["lint"], solve-group = "lint", no-default-feature = true }
+docs = { features = ["docs"], solve-group = "docs", no-default-feature = true  }
+build = { features = ["build"], solve-group = "build",  no-default-feature = true  }
+
+######## Pixi/ GDAL 3.8
+
+[tool.pixi.feature.gdal-38.dependencies]
+libgdal = "==3.8.5"
+libgdal-arrow-parquet = "*"
+proj = ">=9"
+libexpat = "*"
+
+######## Pixi/ GDAL 3.9
+
+[tool.pixi.feature.gdal-39.dependencies]
+libgdal = "==3.9.3"
+libgdal-arrow-parquet = "*"
+proj = ">=9"
+libexpat = "*"
+
+######## Pixi/ GDAL 3.10
+
+[tool.pixi.feature.gdal-310.dependencies]
+libgdal = "==3.10.3"
+libgdal-arrow-parquet = "*"
+proj = ">=9"
+libexpat = "*"
+
+######## Pixi/ GDAL 3.11
+
+[tool.pixi.feature.gdal-311.dependencies]
+libgdal = "==3.11.4"
+libgdal-arrow-parquet = "*"
+proj = ">=9"
+libexpat = "*"
+
+######## Pixi/ DEV
+
+[tool.pixi.feature.dev.pypi-dependencies]
+pytest = ">=7.4.0"
+pytest-cov = ">=4.1.0"
+pytest-recording = ">=0.13.0"
+rasterio = { version = "*", extras = ["s3"] }
+rio-stac = ">=0.10.1"
+morecantile = ">6.1.0"
+
+
+[tool.pixi.feature.dev.tasks]
+test = "pytest --record-mode=once"
+test-ci = "pytest --record-mode=none"
+
+######## Pixi Lint
+
+[tool.pixi.feature.lint.dependencies]
+python = ">=3.10,<=3.12"
+
+[tool.pixi.feature.lint.pypi-dependencies]
+ruff = ">=0.1.12"
+mypy = ">=1.5.1"
+pre-commit = ">=2.19.0"
+types-python-dateutil = ">=2.9.0.20240315"
+types-pytz = ">=2024.1.0.20240203"
+types-requests = ">=2.26.0.20240315"
+
+
+[tool.pixi.feature.lint.tasks]
+_setup = "pre-commit install"
+lint = { cmd = "pre-commit run --all-files", depends-on = ["_setup"] }
+
+######## Pixi/ DOCS
+
+[tool.pixi.feature.docs.dependencies]
+python = ">=3.10"
+
+[tool.pixi.feature.docs.pypi-dependencies]
+mkdocs = ">=1.5.3"
+mkdocs-jupyter = ">=0.24.6"
+mkdocs-material = ">=9.5.3"
+mkdocstrings-python = ">=1.7.5"
+livereload = ">=2.6.3"
+
+[tool.pixi.feature.docs.tasks]
+localdocs = "mkdocs serve"
+deploy = "mkdocs build --strict --verbose --site-dir public"
+
+######## Pixi/ Hatch Build
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[tool.hatch.build.targets.sdist]
+include = ["rio_stac_io"]
+
+[tool.hatch.build.targets.wheel]
+only-include = ["rio_stac_io"]
+
+[tool.pixi.feature.build.dependencies]
+python = ">=3.10"
+
+[tool.pixi.feature.build.pypi-dependencies]
+hatch = "*"
+twine = "*"
+
+[tool.pixi.feature.build.tasks]
+build = "pixi project version set $(git describe --tags) && hatch build"
+deploy = { cmd = "twine upload -r planet dist/*", depends-on = ["build"] }
+
+# PYTEST
+
+[tool.pytest.ini_options]
+addopts = "--cov=rio_stac_io --no-cov-on-fail --cov-report=term-missing:skip-covered --record-mode=rewrite"
+
+[tool.mypy]
+ignore_missing_imports = true
+warn_unused_configs = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+warn_return_any = true
+exclude = "tests/*"
+
+[tool.ruff]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "I001"]
+ignore = []
+fixable = [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "I",
+    "N",
+    "Q",
+    "S",
+    "T",
+    "W",
+    "ANN",
+    "ARG",
+    "BLE",
+    "COM",
+    "DJ",
+    "DTZ",
+    "EM",
+    "ERA",
+    "EXE",
+    "FBT",
+    "ICN",
+    "INP",
+    "ISC",
+    "NPY",
+    "PD",
+    "PGH",
+    "PIE",
+    "PL",
+    "PT",
+    "PTH",
+    "PYI",
+    "RET",
+    "RSE",
+    "RUF",
+    "SIM",
+    "SLF",
+    "TCH",
+    "TID",
+    "TRY",
+    "UP",
+    "YTT",
+]
+unfixable = []
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.format]
+quote-style = "double"

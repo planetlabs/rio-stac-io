@@ -1,0 +1,35 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+exclude: '(?:.*\/cassettes\/.*)|deploy/.*'
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-added-large-files
+        args: ["--maxkb=8048"]
+
+  - repo: local
+    hooks:
+      - id: ruff_format
+        name: Format with ruff
+        language: system
+        types: [python]
+        entry: ruff format
+
+      - id: ruff_lint
+        name: Lint with ruff
+        language: system
+        types: [python]
+        entry: ruff check
+        args: ["--fix"]
+
+      - id: mypy
+        name: MyPy Typecheck
+        language: system
+        types: [python]
+        entry: mypy --config-file=./pyproject.toml
+        exclude: ^tests/
