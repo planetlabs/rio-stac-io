@@ -1,19 +1,44 @@
+import os
+import warnings
 from contextlib import ExitStack
 from tempfile import TemporaryDirectory
 from typing import Any
 
 import rasterio as rio
 from pystac import Item
-from rasterio.env import Env
 
 from rio_stac_io.utils import require_gdal_version
 
 
 @require_gdal_version("3.8.2")
 def open_stacta(
-    item: Item, asset_key: str, zoom_level: int | None = None, **profile: Any
+    item: Item,
+    asset_key: str,
+    zoom_level: int | None = None,
+    skip_missing_metatile: bool | None = None,
+    **profile: Any,
 ) -> rio.DatasetReader:
     stack = ExitStack()
+
+    if skip_missing_metatile is None:
+        skip = os.environ.get("GDAL_STACTA_SKIP_MISSING_METATILE")
+        match skip:
+            case "NO", "no":
+                skip_missing_metatile = False
+            case _:
+                skip_missing_metatile = True
+
+    profile["skip_missing_metatile"] = skip_missing_metatile
+
+    if skip_missing_metatile and not any(
+        [ext for ext in item.stac_extensions if "raster" in ext]
+    ):
+        warnings.warn(
+            "SKIP_MISSING_METATILE is set to True "
+            "but STAC raster extension is not used. "
+            "This will likely cause an error.",
+            UserWarning,
+        )
 
     if zoom_level is not None:
         for key, matrix_set in item.properties["tiles:tile_matrix_sets"].items():
@@ -45,12 +70,10 @@ def open_stacta(
 
         href = f'STACTA:"{tmp_path}":{asset_key}'
 
-        stack.enter_context(Env(GDAL_STACTA_SKIP_MISSING_METATILE=True))
         dataset = rio.open(href, **profile)
     except Exception:
         stack.close()
         raise
 
     dataset._env = stack
-    print(dataset)
     return dataset

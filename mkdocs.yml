@@ -1,0 +1,86 @@
+# project
+site_name: 'rio-stac-io'
+site_description: ''
+
+# documentation build
+docs_dir: 'docs'
+site_dir: 'build'
+
+# site info
+repo_name: 'forests/rio-stac-io'
+repo_url: 'https://hello.planet.com/code/planetary-variables/forests/rio-stac-io'
+site_url: 'https://forests.pages.earth.planet.com/rio-stac-io/'
+
+# social
+extra:
+    social:
+      - icon: 'material/earth'
+        link: 'https://hello.planet.com/code/planetary-variables/forests'
+      - icon: 'fontawesome/brands/gitlab'
+        link: 'https://hello.planet.com/code/planetary-variables/forests'
+
+# site navigation
+nav:
+    - Home: 'index.md'
+
+# theme
+theme:
+    logo: 'img/PL.svg'
+    icon:
+      repo: 'fontawesome/brands/gitlab'
+    name: 'material'
+    language: 'en'
+    nav_style: dark
+    palette:
+      - media: "(prefers-color-scheme: light)"
+        scheme: 'salo-light'
+        toggle:
+          icon: 'material/weather-night'
+          name: 'Dark mode'
+      - media: "(prefers-color-scheme: dark)"
+        scheme: 'slate'
+        toggle:
+          icon: 'material/weather-sunny'
+          name: 'Light mode'
+    font:
+      text: 'PT Sans'
+      code: 'Source Code Pro'
+    favicon: 'img/favicon.ico'
+    features:
+      - navigation.top
+
+# extras
+plugins:
+    - search
+    - mkdocstrings
+
+extra_css:
+    - css/style.css
+
+# pandoc (https://pandoc.org/MANUAL.html)
+markdown_extensions:
+    - admonition
+    - attr_list
+    - codehilite:
+        guess_lang: false
+    - def_list
+    - footnotes
+    - pymdownx.arithmatex
+    - pymdownx.betterem
+    - pymdownx.caret:
+        insert: false
+    - pymdownx.details
+    - pymdownx.emoji
+    - pymdownx.escapeall:
+        hardbreak: true
+        nbsp: true
+    - pymdownx.magiclink:
+        hide_protocol: true
+        repo_url_shortener: true
+    - pymdownx.smartsymbols
+    - pymdownx.superfences
+    - pymdownx.tasklist:
+        custom_checkbox: true
+    - pymdownx.tilde
+    - toc:
+        permalink: true
