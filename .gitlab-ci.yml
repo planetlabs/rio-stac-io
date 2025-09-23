@@ -63,7 +63,7 @@ lint:
        - pixi run -e lint lint
 
 
-build:
+pages:
   stage: build
   extends: .pixi
   script:
