@@ -25,3 +25,5 @@ Please note that GDAL STAC support changes between different versions. For best 
 ## Usage
 
 :::rio_stac_io.open
+    options:
+        show_root_toc_entry: false

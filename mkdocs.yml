@@ -9,7 +9,7 @@ site_dir: 'build'
 # site info
 repo_name: 'forests/rio-stac-io'
 repo_url: 'https://hello.planet.com/code/planetary-variables/forests/rio-stac-io'
-site_url: 'https://forests.pages.earth.planet.com/rio-stac-io/'
+site_url: 'https://planetary-variables.pages.earth.planet.com/forests/rio-stac-io/'
 
 # social
 extra:

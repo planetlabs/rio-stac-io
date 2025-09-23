@@ -41,6 +41,10 @@ def open(
 
     ## Drivers
 
+    rio-stac-io will determine which driver to use based on your input data.
+    By default, it will use the STACIT driver for all ItemCollection and ItemSearch inputs,
+    STACTA for Items that use the tiled-asset STAC extension and rasterio when using a regular item.
+
     ### STACIT
 
     The [GDAL StacIT driver](https://gdal.org/en/stable/drivers/raster/stacit.html)
@@ -74,7 +78,7 @@ def open(
         max_items: int = 1000,  # Maximum number of items fetched. 0: unlimited
         collection: str | None = None  # Name of collection to filter items.
         crs: str | None | None  # Name of CRS to filter items.
-        resolution: Literal["AVERAGE", "HIGHEST", "​LOWEST"] = "AVERAGE"  # Strategy to use to determine dataset.
+        resolution: Literal["AVERAGE", "HIGHEST", "​LOWEST"] = "AVERAGE"  # Strategy to use to determine dataset resolution.
         overlap_strategy: Literal["REMOVE_IF_NO_NODATA​", ​"USE_ALL", "​USE_MOST_RECENT"] = "REMOVE_IF_NO_NODATA"  # Strategy to use when the ItemCollections contains overlapping items.
         ) -> rio.DatasetReader:
         ....
