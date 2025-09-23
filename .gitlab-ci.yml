@@ -67,7 +67,7 @@ build:
   stage: build
   extends: .pixi
   script:
-    - pixi run build-docs
+    - pixi run -e docs deploy
     - echo "The site will be deployed to $CI_PAGES_URL"
   artifacts:
     paths:
