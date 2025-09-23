@@ -17,14 +17,142 @@ def open(
     zoom_level: int | None = None,
     **kwargs: Any,
 ) -> rio.DatasetReader:
+    """rio-stac-io accepts any pystac Item, ItemCollection or ItemSearch
+    and returns a rasterio DatasetReader.
+    Input items will be merged into a single layer,
+    similar to a VRT and served as a single rasterio Dataset.
+    If you need to read time series,
+    consider using [ODC STAC](https://github.com/opendatacube/odc-stac)
+    that will return an multi-dimensional XArray object instead.
+
+    ```python
+
+    from pystac_client import Client
+
+    import rio_stac_io as stacio
+
+    client = Client.open(...)
+    search = client.search(...)
+
+    with stacio.open(search, asset_key="data") as src:
+        data = src.read()
+
+    ```
+
+    ## Drivers
+
+    ### STACIT
+
+    The [GDAL StacIT driver](https://gdal.org/en/stable/drivers/raster/stacit.html)
+    accepts pystac ItemCollections or ItemSearch as input and
+    will return a rasterio Dataset, similar to a VRT.
+    This driver is used by default when using a ItemCollection or ItemSearch as input.
+
+    STAC Items must use the [STAC Projection extension](https://github.com/stac-extensions/projection),
+    providing metadata about CRS used, projected bounds and Affine transformation.
+    Items without this metadata will be ignored.
+
+    By default, STACIT will split items from different STAC collections
+    or with different projections into subdatasets.
+    You can force the driver to return a single dataset
+    by either filtering by CRS or Collections or telling it
+    to merge all collections setting `merge_collections=True`.
+
+    If you need to merge items using different projection
+    consider using the GTI driver instead.
+
+    While the StacIT driver only fully supports STAC v1.1.0
+    Items starting with GDAL 3.10.2, `rio-stac-io` will assure
+    backwards compatibility also for earlier GDAL versions.
+
+
+    ```python
+    rio_stac_io.open(
+        items: pystac.ItemCollection | pystac_client.ItemSearch  # Input Stac Items
+        asset_key: str  # asset to open
+        merge_collections: bool = False,  # Combine items from multiple collections into a single dataset.
+        max_items: int = 1000,  # Maximum number of items fetched. 0: unlimited
+        collection: str | None = None  # Name of collection to filter items.
+        crs: str | None | None  # Name of CRS to filter items.
+        resolution: Literal["AVERAGE", "HIGHEST", "​LOWEST"] = "AVERAGE"  # Strategy to use to determine dataset.
+        overlap_strategy: Literal["REMOVE_IF_NO_NODATA​", ​"USE_ALL", "​USE_MOST_RECENT"] = "REMOVE_IF_NO_NODATA"  # Strategy to use when the ItemCollections contains overlapping items.
+        ) -> rio.DatasetReader:
+        ....
+    ```
+
+    ### GTI
+    Similar to STACIT, the [GDAL GTI driver](https://gdal.org/en/stable/drivers/raster/gti.html)
+    accepts pystac ItemCollections or ItemSearch as input and will return a rasterio Dataset,
+    similar to a VRT.
+
+    The GTI driver requires GDAL version 3.10 or later and GDAL must be build with (geo)parquet support.
+    In addition, rio-stac-io needs to be installed together with the `gti` extras.
+
+    Because of the extra dependencies, this driver is not the default and users
+    must opt into it by setting `use_gti=True`.
+
+    Unlike STACIT, GTI will always combine input items into a single rasterio Dataset.
+    Items in different projections will be reprojected into the projection of the first item.
+    The user can also set a different output projection by setting the `srs` argument.
+
+
+    ```python
+    rio_stac_io.open(
+        items: pystac.ItemCollection | pystac_client.ItemSearch,  # Input Stac Items
+        asset_key: str,  # asset to open
+        use_gti: bool = False,  # Must be set to True, in order to use this driver!
+        sort_field: str | None = None,  # Name of a field to use to control the order in which tiles are composited, when they overlap (z-order). That field may be of type String, Integer, Integer64, Date or DateTime. By default, the higher the value in that field, the last the corresponding tile will be rendered in the virtual mosaic (unless SORT_FIELD_ASC=NO is set)
+        sort_field_asc: bool = True, # Whether the values in SORT_FIELD should be sorted in ascending or descending order
+        filter: str | None = None,  # Value of a SQL WHERE clause, used to select a subset of the features of the index.
+        resx: float | None = None,  # Resolution along X axis in SRS units / pixel.
+        resy: float | None = None,  # Resolution along Y axis in SRS units / pixel.
+        srs: str | None = None,  # Override/sets the Spatial Reference System
+        minx: float | None = None,  # Minimum X value for the virtual mosaic extent
+        miny: float | None = None,  # Minimum Y value for the virtual mosaic extent
+        maxx: float | None = None,  # Maximum X value for the virtual mosaic extent
+        maxy: float | None = None  # Maximum Y value for the virtual mosaic extent
+        ) -> rio.DatasetReader:
+        ....
+    ```
+
+    ### STACTA
+
+    The [GDAL StacTA driver](https://gdal.org/en/stable/drivers/raster/stacta.html)
+    accepts single STAC item that implements the
+    [tiled-assets STAC extension](https://github.com/stac-extensions/tiled-assets/tree/main).
+    The driver is designed to open gridded data that are stored following the TMS specifications
+    (ie Z/X/Y file path). All data will be loaded lazily.
+
+    When using GDAL versions prior to v3.8.x, the driver expects all tiles of the Tile matrix to be present.
+    Later versions will try to use the [STAC Raster extension](https://github.com/stac-extensions/raster/tree/main)
+    metadata (if present) to infer datatype and no data value. When using sparse tiles you must set `skip_missing_metatile=True`.
+
+
+    ```python
+    rio_stac_io.open(
+        items: pystac.Item,  # Input Stac Item, must implement the Tiled Asset STAC extension
+        asset_key: str,  # asset to open
+        zoom_level: int | None = None,  # Specific zoom level to open. Will default to the max zoom level specified in the tile matrix set.
+        whole_metatile: bool = True,  # If set to True, metatiles will be entirely downloaded (into memory). Otherwise by default, if metatiles are bigger than a threshold, they will be accessed in a piece-wise way.
+        skip_missing_metatile: bool = True,  # If set to True, metatiles that are missing will be skipped without error, and corresponding area in the dataset will be filled with the nodata value or zero if there is no nodata value. This setting will require the STAC Raster Extension. This setting can also be set with the GDAL_STACTA_SKIP_MISSING_METATILE configuration option.
+        ) -> rio.DatasetReader:
+        ....
+    ```
+
+
+    """  # noqa: E501
     if isinstance(items, Item):
         if any([ext for ext in items.stac_extensions if "tiled-assets" in ext]):
             return open_stacta(items, asset_key, zoom_level=zoom_level, **kwargs)
         else:
             return rio.open(items.assets[asset_key].href)
 
-    if use_gti:
-        return open_gti(items, asset_key, **kwargs)
+    elif isinstance(items, (ItemCollection, ItemSearch)):
+        if use_gti:
+            return open_gti(items, asset_key, **kwargs)
+
+        else:
+            return open_stacit(items, asset_key, merge_collections, **kwargs)
 
     else:
-        return open_stacit(items, asset_key, merge_collections, **kwargs)
+        return rio.open(items, **kwargs)

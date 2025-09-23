@@ -7,7 +7,8 @@ import morecantile
 import numpy as np
 import pytest
 import rasterio as rio
-from pystac import Item, ItemCollection, MediaType
+from pystac import Item, ItemCollection
+from pystac.extensions.raster import RasterExtension
 from rasterio.enums import Resampling
 from rio_stac.stac import create_stac_item
 from shapely import box, to_geojson
@@ -298,8 +299,7 @@ def stac_item_collection_overlap() -> Generator:
         os.remove(f"{path}/item_{i}.tif")
 
 
-@pytest.fixture()
-def stacta_item():
+def _stacta_item(sparse: bool, raster_ext: bool):
     tms = morecantile.tms.get("WGS1984Quad")
     parent = morecantile.Tile(512, 256, 9)
     children = tms.children(parent)
@@ -344,7 +344,7 @@ def stacta_item():
                 input_datetime=dt.datetime(2020, 1, 1, tzinfo=dt.timezone.utc),
                 asset_name="data",
                 with_proj=True,
-                with_raster=True,
+                with_raster=raster_ext,
             )
             items.append(item)
 
@@ -373,7 +373,7 @@ def stacta_item():
     matrix_set["tileMatrices"] = [
         matrix
         for matrix in matrix_set["tileMatrices"]
-        if int(matrix["id"]) <= children[0].z
+        if int(matrix["id"]) <= children[0].z and int(matrix["id"]) >= parent.z
     ]
 
     stacta_item = Item(
@@ -406,20 +406,49 @@ def stacta_item():
             },
             "tiles:tile_matrix_sets": {tms.id: matrix_set},
         },
-        extra_fields={
-            "asset_templates": {
-                "data": {
-                    "href": f"{path}/{{TileMatrix}}/{{TileCol}}/{{TileRow}}/item.tif",
-                    "media_type": MediaType.GEOTIFF,
-                    "roles": ["data"],
-                },
-            }
-        },
     )
 
+    asset_template = items[0].assets["data"].to_dict()
+    asset_template["href"] = f"{path}/{{TileMatrix}}/{{TileCol}}/{{TileRow}}/item.tif"
+    stacta_item.extra_fields = {"asset_templates": {"data": asset_template}}
+    if raster_ext:
+        stacta_item.ext.add(RasterExtension.name)
+
+    if sparse:
+        x = min(tile.x for tile in children)
+        y = min(tile.y for tile in children)
+        z = min(tile.z for tile in children)
+        os.remove(f"{path}/{z}/{x}/{y}/item.tif")
+        os.remove(f"{path}/{parent.z}/{parent.x}/{parent.y}/item.tif")
+
+    stacta_item.save_object(dest_href=f"stacta-{raster_ext}.json")
     yield stacta_item
 
-    os.remove(f"{path}/{parent.z}/{parent.x}/{parent.y}/item.tif")
+    if not sparse:
+        os.remove(f"{path}/{parent.z}/{parent.x}/{parent.y}/item.tif")
 
     for tile in children:
-        os.remove(f"{path}/{tile.z}/{tile.x}/{tile.y}/item.tif")
+        try:
+            os.remove(f"{path}/{tile.z}/{tile.x}/{tile.y}/item.tif")
+        except FileNotFoundError:
+            pass
+
+
+@pytest.fixture()
+def stacta_item():
+    yield from _stacta_item(sparse=False, raster_ext=False)
+
+
+@pytest.fixture()
+def stacta_item_raster():
+    yield from _stacta_item(sparse=False, raster_ext=True)
+
+
+@pytest.fixture()
+def stacta_item_sparse():
+    yield from _stacta_item(sparse=True, raster_ext=False)
+
+
+@pytest.fixture()
+def stacta_item_sparse_raster():
+    yield from _stacta_item(sparse=True, raster_ext=True)
