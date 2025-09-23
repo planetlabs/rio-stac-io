@@ -42,6 +42,7 @@ with stacio.open(search, asset_key="data") as src:
 This repository requires Pixi v0.52.0 or later.
 
 ```
-git clone
+git clone git@code.earth.planet.com:planetary-variables/forests/rio-stac-io.git
+cd rio-stac-io
 pixi shell -e dev
 ```
