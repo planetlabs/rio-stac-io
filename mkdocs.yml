@@ -51,8 +51,8 @@ theme:
 
 # extras
 plugins:
-    - search
-    - mkdocstrings
+  - search
+  - mkdocstrings
 
 extra_css:
     - css/style.css

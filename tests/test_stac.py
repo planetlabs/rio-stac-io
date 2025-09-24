@@ -1,11 +1,12 @@
 import contextlib
 
 import pytest
+from pystac import Item
 
 import rio_stac_io as stacio
 
 
-def test_stac_item(stac_item):
+def test_stac_item(stac_item: Item):
     with stacio.open(stac_item, asset_key="data") as src:
         assert src.driver == "GTiff"
         assert src.bounds == (0, -16, 16, 0)
