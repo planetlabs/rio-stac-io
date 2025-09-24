@@ -283,8 +283,8 @@ def open(
 
     ```
 
-    Drivers
-    -------
+    # Drivers
+
     rio-stac-io will determine which driver to use based on your input data.
     By default, it will use the STACIT driver for all
     ItemCollection and ItemSearch inputs.
