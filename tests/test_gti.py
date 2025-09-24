@@ -110,7 +110,7 @@ def test_open_gti_search():
         20,
     ]
 
-    with stacio.open(search, "data", use_gti=True) as src:
+    with stacio.open(search, asset_key="data", use_gti=True) as src:
         assert len(src.files) == 121
         for i, val in enumerate(src.bounds):
             assert val == pytest.approx(expected_bounds[i], 0.0001), (
@@ -125,7 +125,9 @@ def test_open_gti_search():
 def test_open_gti_overlap(stac_item_collection_overlap):
     bounds = [0, -16, 16, 16]
 
-    with stacio.open(stac_item_collection_overlap, "data", use_gti=True) as src:
+    with stacio.open(
+        stac_item_collection_overlap, asset_key="data", use_gti=True
+    ) as src:
         assert src.profile["driver"] == "GTI"
         assert src.profile["crs"] == "EPSG:4326"
         for i, val in enumerate(src.bounds):

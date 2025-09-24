@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Literal
 
 import rasterio as rio
 from pystac import Item, ItemCollection
@@ -11,6 +11,8 @@ from rio_stac_io.drivers.stacta import open_stacta
 
 def open(
     items: Item | ItemCollection | ItemSearch,
+    mode: Literal["r"] = "r",
+    *,
     asset_key: str,
     use_gti: bool = False,
     merge_collections: bool = False,
@@ -72,8 +74,10 @@ def open(
 
     ```python
     rio_stac_io.open(
-        items: pystac.ItemCollection | pystac_client.ItemSearch  # Input Stac Items
-        asset_key: str  # asset to open
+        items: pystac.ItemCollection | pystac_client.ItemSearch,  # Input Stac Items
+        mode: Literal["r"] = "r",  # read-only mode
+        *,
+        asset_key: str,  # asset to open
         merge_collections: bool = False,  # Combine items from multiple collections into a single dataset.
         max_items: int = 1000,  # Maximum number of items fetched. 0: unlimited
         collection: str | None = None  # Name of collection to filter items.
@@ -103,6 +107,8 @@ def open(
     ```python
     rio_stac_io.open(
         items: pystac.ItemCollection | pystac_client.ItemSearch,  # Input Stac Items
+        mode: Literal["r"] = "r",  # read-only mode
+        *,
         asset_key: str,  # asset to open
         use_gti: bool = False,  # Must be set to True, in order to use this driver!
         sort_field: str | None = None,  # Name of a field to use to control the order in which tiles are composited, when they overlap (z-order). That field may be of type String, Integer, Integer64, Date or DateTime. By default, the higher the value in that field, the last the corresponding tile will be rendered in the virtual mosaic (unless SORT_FIELD_ASC=NO is set)
@@ -135,6 +141,8 @@ def open(
     ```python
     rio_stac_io.open(
         items: pystac.Item,  # Input Stac Item, must implement the Tiled Asset STAC extension
+        mode: Literal["r"] = "r",  # read-only mode
+        *,
         asset_key: str,  # asset to open
         zoom_level: int | None = None,  # Specific zoom level to open. Will default to the max zoom level specified in the tile matrix set.
         whole_metatile: bool = True,  # If set to True, metatiles will be entirely downloaded (into memory). Otherwise by default, if metatiles are bigger than a threshold, they will be accessed in a piece-wise way.
@@ -143,8 +151,13 @@ def open(
         ....
     ```
 
-
     """  # noqa: E501
+
+    if mode != "r":
+        raise ValueError(
+            f"This is a read-only dataset. Mode `{mode}` is not supported."
+        )
+
     if isinstance(items, Item):
         if any([ext for ext in items.stac_extensions if "tiled-assets" in ext]):
             return open_stacta(items, asset_key, zoom_level=zoom_level, **kwargs)

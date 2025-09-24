@@ -97,7 +97,7 @@ def test_open_stacit_search():
         20.000138888888888,
     ]
 
-    with stacio.open(search, "data") as src:
+    with stacio.open(search, asset_key="data") as src:
         assert len(src.files) == 121
         for i, val in enumerate(src.bounds):
             assert val == pytest.approx(expected_bounds[i]), (
@@ -117,7 +117,9 @@ def test_open_stacit_overlap(stac_item_collection_overlap, overlap_strategy, exp
     bounds = [0, -16, 16, 16]
 
     with stacio.open(
-        stac_item_collection_overlap, "data", overlap_strategy=overlap_strategy
+        stac_item_collection_overlap,
+        asset_key="data",
+        overlap_strategy=overlap_strategy,
     ) as src:
         assert src.profile["crs"] == "EPSG:4326"
         for i, val in enumerate(src.bounds):
