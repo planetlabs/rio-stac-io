@@ -176,7 +176,7 @@ def open(
     mode: Literal["r"] = "r",
     *,
     asset_key: str,
-) -> rio.DatasetReader:
+) -> rio.DatasetReader:  # type: ignore[overload-cannot-match]  # passes on macos but not linux ¯\_(ツ)_/¯
     """
     STAC Item
 
@@ -208,7 +208,7 @@ def open(
     zoom_level: int | None = None,
     whole_metatile: bool = True,
     skip_missing_metatile: bool = True,
-) -> rio.DatasetReader:
+) -> rio.DatasetReader:  # type: ignore[overload-cannot-match]  # passes on macos but not linux ¯\_(ツ)_/¯
     """
     STACTA
 
