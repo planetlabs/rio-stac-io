@@ -171,12 +171,12 @@ def open(
 
 
 @overload
-def open(
+def open(  # type: ignore[overload-cannot-match]  # passes on macos but not linux ¯\_(ツ)_/¯
     items: Annotated[pystac.Item, "regular STAC Item"],
     mode: Literal["r"] = "r",
     *,
     asset_key: str,
-) -> rio.DatasetReader:  # type: ignore[overload-cannot-match]  # passes on macos but not linux ¯\_(ツ)_/¯
+) -> rio.DatasetReader:
     """
     STAC Item
 
@@ -200,7 +200,7 @@ def open(
 
 
 @overload
-def open(
+def open(  # type: ignore[overload-cannot-match]  # passes on macos but not linux ¯\_(ツ)_/¯
     items: Annotated[pystac.Item, "uses tiled-assets STAC extension"],
     mode: Literal["r"] = "r",
     *,
@@ -208,7 +208,7 @@ def open(
     zoom_level: int | None = None,
     whole_metatile: bool = True,
     skip_missing_metatile: bool = True,
-) -> rio.DatasetReader:  # type: ignore[overload-cannot-match]  # passes on macos but not linux ¯\_(ツ)_/¯
+) -> rio.DatasetReader:
     """
     STACTA
 
