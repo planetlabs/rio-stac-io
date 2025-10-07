@@ -1,0 +1,227 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.5
+    method: GET
+    uri: https://earth-search.aws.element84.com/v1/
+  response:
+    body:
+      string: '{"stac_version":"1.0.0","type":"Catalog","id":"earth-search-aws","title":"Earth
+        Search by Element 84","description":"A STAC API of public datasets on AWS","links":[{"rel":"self","type":"application/json","href":"https://earth-search.aws.element84.com/v1"},{"rel":"root","type":"application/json","href":"https://earth-search.aws.element84.com/v1"},{"rel":"conformance","type":"application/json","href":"https://earth-search.aws.element84.com/v1/conformance"},{"rel":"data","type":"application/json","href":"https://earth-search.aws.element84.com/v1/collections"},{"rel":"search","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/search","method":"GET"},{"rel":"search","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/search","method":"POST"},{"rel":"aggregate","type":"application/json","href":"https://earth-search.aws.element84.com/v1/aggregate","method":"GET"},{"rel":"aggregations","type":"application/json","href":"https://earth-search.aws.element84.com/v1/aggregations"},{"rel":"service-desc","type":"application/vnd.oai.openapi","href":"https://earth-search.aws.element84.com/v1/api"},{"rel":"service-doc","type":"text/html","href":"https://earth-search.aws.element84.com/v1/api.html"},{"rel":"http://www.opengis.net/def/rel/ogc/1.0/queryables","type":"application/schema+json","href":"https://earth-search.aws.element84.com/v1/queryables"},{"rel":"server","type":"text/html","href":"https://stac-utils.github.io/stac-server/"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/naip"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-90"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/landsat-c2-l2"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/sentinel-2-l1c"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/sentinel-2-c1-l2a"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/sentinel-1-grd"}],"conformsTo":["https://api.stacspec.org/v1.0.0/core","https://api.stacspec.org/v1.0.0/collections","https://api.stacspec.org/v1.0.0/ogcapi-features","https://api.stacspec.org/v1.0.0/item-search","https://api.stacspec.org/v1.0.0/ogcapi-features#fields","https://api.stacspec.org/v1.0.0/ogcapi-features#sort","https://api.stacspec.org/v1.0.0/ogcapi-features#query","https://api.stacspec.org/v1.0.0/item-search#fields","https://api.stacspec.org/v1.0.0/item-search#sort","https://api.stacspec.org/v1.0.0/item-search#query","https://api.stacspec.org/v0.3.0/aggregation","http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core","http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/oas30","http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson"]}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Length:
+      - '612'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 07 Oct 2025 16:45:25 GMT
+      Via:
+      - 1.1 434e1d253124c6f9517c35a2c6014518.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - YqGXRdfs8yvYgkVQeDU0qwnkamLai1vNAfTHugjwMr4IzziT8y-7Nw==
+      X-Amz-Cf-Pop:
+      - IAD55-P10
+      X-Amzn-Trace-Id:
+      - Root=1-68e543a5-129c9cf51e31b80b5f1e2a19;Parent=7f0c9add852a3b40;Sampled=0;Lineage=1:9e2884e9:0
+      X-Cache:
+      - Miss from cloudfront
+      access-control-allow-origin:
+      - '*'
+      etag:
+      - W/"d29-QPs+H0wJLUX32EZKNgzG3k6wfQ8"
+      x-amz-apigw-id:
+      - SFeB7HxpvHcEcLA=
+      x-amzn-Remapped-content-length:
+      - '3369'
+      x-amzn-RequestId:
+      - 6ef82f64-3e6d-464b-b5a9-4a9e31b84286
+      x-powered-by:
+      - Express
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.5
+    method: GET
+    uri: https://earth-search.aws.element84.com/v1
+  response:
+    body:
+      string: '{"stac_version":"1.0.0","type":"Catalog","id":"earth-search-aws","title":"Earth
+        Search by Element 84","description":"A STAC API of public datasets on AWS","links":[{"rel":"self","type":"application/json","href":"https://earth-search.aws.element84.com/v1"},{"rel":"root","type":"application/json","href":"https://earth-search.aws.element84.com/v1"},{"rel":"conformance","type":"application/json","href":"https://earth-search.aws.element84.com/v1/conformance"},{"rel":"data","type":"application/json","href":"https://earth-search.aws.element84.com/v1/collections"},{"rel":"search","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/search","method":"GET"},{"rel":"search","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/search","method":"POST"},{"rel":"aggregate","type":"application/json","href":"https://earth-search.aws.element84.com/v1/aggregate","method":"GET"},{"rel":"aggregations","type":"application/json","href":"https://earth-search.aws.element84.com/v1/aggregations"},{"rel":"service-desc","type":"application/vnd.oai.openapi","href":"https://earth-search.aws.element84.com/v1/api"},{"rel":"service-doc","type":"text/html","href":"https://earth-search.aws.element84.com/v1/api.html"},{"rel":"http://www.opengis.net/def/rel/ogc/1.0/queryables","type":"application/schema+json","href":"https://earth-search.aws.element84.com/v1/queryables"},{"rel":"server","type":"text/html","href":"https://stac-utils.github.io/stac-server/"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/naip"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-90"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/landsat-c2-l2"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/sentinel-2-l1c"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/sentinel-2-c1-l2a"},{"rel":"child","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/sentinel-1-grd"}],"conformsTo":["https://api.stacspec.org/v1.0.0/core","https://api.stacspec.org/v1.0.0/collections","https://api.stacspec.org/v1.0.0/ogcapi-features","https://api.stacspec.org/v1.0.0/item-search","https://api.stacspec.org/v1.0.0/ogcapi-features#fields","https://api.stacspec.org/v1.0.0/ogcapi-features#sort","https://api.stacspec.org/v1.0.0/ogcapi-features#query","https://api.stacspec.org/v1.0.0/item-search#fields","https://api.stacspec.org/v1.0.0/item-search#sort","https://api.stacspec.org/v1.0.0/item-search#query","https://api.stacspec.org/v0.3.0/aggregation","http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core","http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/oas30","http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson"]}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Length:
+      - '612'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 07 Oct 2025 16:45:25 GMT
+      Via:
+      - 1.1 3483bb08dcec46a109a14ce9ac39dea6.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - 3PAY_F-0hn__ia8WmR2GN9rDb0RxZFmxLax3rtUSHer8ee9BPVMJLw==
+      X-Amz-Cf-Pop:
+      - IAD55-P10
+      X-Amzn-Trace-Id:
+      - Root=1-68e543a5-1be073ea06fe06d27bed2ed5;Parent=62c2ba8d46998dae;Sampled=0;Lineage=1:9e2884e9:0
+      X-Cache:
+      - Miss from cloudfront
+      access-control-allow-origin:
+      - '*'
+      etag:
+      - W/"d29-QPs+H0wJLUX32EZKNgzG3k6wfQ8"
+      x-amz-apigw-id:
+      - SFeB9GQovHcEtrA=
+      x-amzn-Remapped-content-length:
+      - '3369'
+      x-amzn-RequestId:
+      - 601a28ce-fbba-461e-b71e-be8d9ec30153
+      x-powered-by:
+      - Express
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"bbox": [10.0, 10.0, 11.0, 11.0], "collections": ["cop-dem-glo-30"]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '69'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.5
+    method: POST
+    uri: https://earth-search.aws.element84.com/v1/search
+  response:
+    body:
+      string: '{"type":"FeatureCollection","stac_version":"1.0.0","stac_extensions":[],"context":{"limit":10,"matched":4,"returned":4},"numberMatched":4,"numberReturned":4,"features":[{"type":"Feature","stac_version":"1.0.0","id":"Copernicus_DSM_COG_10_N10_00_E011_00_DEM","properties":{"platform":"tandem-x","gsd":30,"proj:epsg":4326,"proj:transform":[0.0002777777777777778,0,10.99986111111111,0,-0.0002777777777777778,11.00013888888889],"proj:shape":[3600,3600],"proj:centroid":{"lat":10.5,"lon":11.5},"grid:code":"CDEM-N10E011","storage:platform":"AWS","storage:region":"eu-central-1","storage:requester_pays":false,"earthsearch:payload_id":"cop-dem-glo/workflow-cop-dem-glo-to-stac/29a935f6801610bf6e9241e994712b39","datetime":"2021-04-22T00:00:00Z","processing:software":{"cop-dem-glo-to-stac":"2023.03.28"},"created":"2023-03-28T15:20:21.190Z","updated":"2023-04-20T18:10:39.795Z"},"geometry":{"type":"Polygon","coordinates":[[[11.99986111111111,10.00013888888889],[11.99986111111111,11.00013888888889],[10.99986111111111,11.00013888888889],[10.99986111111111,10.00013888888889],[11.99986111111111,10.00013888888889]]]},"links":[{"rel":"self","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30/items/Copernicus_DSM_COG_10_N10_00_E011_00_DEM"},{"rel":"canonical","href":"s3://earthsearch-data/cop-dem-glo-30/Copernicus_DSM_COG_10_N10_00_E011_00_DEM/Copernicus_DSM_COG_10_N10_00_E011_00_DEM.json","type":"application/json"},{"rel":"handbook","href":"https://object.cloud.sdsc.edu/v1/AUTH_opentopography/www/metadata/Copernicus_metadata.pdf","type":"application/pdf","title":"Copernicus
+        DEM User handbook","description":"Also includes data usage information"},{"rel":"parent","type":"application/json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30"},{"rel":"collection","type":"application/json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30"},{"rel":"root","type":"application/json","href":"https://earth-search.aws.element84.com/v1"},{"rel":"thumbnail","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30/items/Copernicus_DSM_COG_10_N10_00_E011_00_DEM/thumbnail"}],"assets":{"data":{"href":"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N10_00_E011_00_DEM/Copernicus_DSM_COG_10_N10_00_E011_00_DEM.tif","type":"image/tiff;
+        application=geotiff; profile=cloud-optimized","title":"Data","raster:bands":[{"sampling":"point","data_type":"float32","spatial_resolution":30,"unit":"meter"}],"roles":["data"]}},"bbox":[10.99986111111111,10.00013888888889,11.99986111111111,11.00013888888889],"stac_extensions":["https://stac-extensions.github.io/storage/v1.0.0/schema.json","https://stac-extensions.github.io/projection/v1.1.0/schema.json","https://stac-extensions.github.io/processing/v1.1.0/schema.json","https://stac-extensions.github.io/raster/v1.1.0/schema.json","https://stac-extensions.github.io/grid/v1.1.0/schema.json"],"collection":"cop-dem-glo-30"},{"type":"Feature","stac_version":"1.0.0","id":"Copernicus_DSM_COG_10_N10_00_E010_00_DEM","properties":{"platform":"tandem-x","gsd":30,"proj:epsg":4326,"proj:transform":[0.0002777777777777778,0,9.99986111111111,0,-0.0002777777777777778,11.00013888888889],"proj:shape":[3600,3600],"proj:centroid":{"lat":10.5,"lon":10.5},"grid:code":"CDEM-N10E010","storage:platform":"AWS","storage:region":"eu-central-1","storage:requester_pays":false,"earthsearch:payload_id":"cop-dem-glo/workflow-cop-dem-glo-to-stac/4165099c5a6e64e77130fa2e8922f23d","datetime":"2021-04-22T00:00:00Z","processing:software":{"cop-dem-glo-to-stac":"2023.03.28"},"created":"2023-03-28T15:20:23.127Z","updated":"2023-04-20T18:10:38.766Z"},"geometry":{"type":"Polygon","coordinates":[[[10.99986111111111,10.00013888888889],[10.99986111111111,11.00013888888889],[9.99986111111111,11.00013888888889],[9.99986111111111,10.00013888888889],[10.99986111111111,10.00013888888889]]]},"links":[{"rel":"self","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30/items/Copernicus_DSM_COG_10_N10_00_E010_00_DEM"},{"rel":"canonical","href":"s3://earthsearch-data/cop-dem-glo-30/Copernicus_DSM_COG_10_N10_00_E010_00_DEM/Copernicus_DSM_COG_10_N10_00_E010_00_DEM.json","type":"application/json"},{"rel":"handbook","href":"https://object.cloud.sdsc.edu/v1/AUTH_opentopography/www/metadata/Copernicus_metadata.pdf","type":"application/pdf","title":"Copernicus
+        DEM User handbook","description":"Also includes data usage information"},{"rel":"parent","type":"application/json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30"},{"rel":"collection","type":"application/json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30"},{"rel":"root","type":"application/json","href":"https://earth-search.aws.element84.com/v1"},{"rel":"thumbnail","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30/items/Copernicus_DSM_COG_10_N10_00_E010_00_DEM/thumbnail"}],"assets":{"data":{"href":"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N10_00_E010_00_DEM/Copernicus_DSM_COG_10_N10_00_E010_00_DEM.tif","type":"image/tiff;
+        application=geotiff; profile=cloud-optimized","title":"Data","raster:bands":[{"sampling":"point","data_type":"float32","spatial_resolution":30,"unit":"meter"}],"roles":["data"]}},"bbox":[9.99986111111111,10.00013888888889,10.99986111111111,11.00013888888889],"stac_extensions":["https://stac-extensions.github.io/projection/v1.1.0/schema.json","https://stac-extensions.github.io/grid/v1.1.0/schema.json","https://stac-extensions.github.io/processing/v1.1.0/schema.json","https://stac-extensions.github.io/storage/v1.0.0/schema.json","https://stac-extensions.github.io/raster/v1.1.0/schema.json"],"collection":"cop-dem-glo-30"},{"type":"Feature","stac_version":"1.0.0","id":"Copernicus_DSM_COG_10_N09_00_E011_00_DEM","properties":{"platform":"tandem-x","gsd":30,"proj:epsg":4326,"proj:transform":[0.0002777777777777778,0,10.99986111111111,0,-0.0002777777777777778,10.00013888888889],"proj:shape":[3600,3600],"proj:centroid":{"lat":9.5,"lon":11.5},"grid:code":"CDEM-N09E011","storage:platform":"AWS","storage:region":"eu-central-1","storage:requester_pays":false,"earthsearch:payload_id":"cop-dem-glo/workflow-cop-dem-glo-to-stac/cb5a020494db20f9c7d743b1c7a5d025","datetime":"2021-04-22T00:00:00Z","processing:software":{"cop-dem-glo-to-stac":"2023.03.28"},"created":"2023-03-28T15:20:18.624Z","updated":"2023-04-20T18:10:37.529Z"},"geometry":{"type":"Polygon","coordinates":[[[11.99986111111111,9.00013888888889],[11.99986111111111,10.00013888888889],[10.99986111111111,10.00013888888889],[10.99986111111111,9.00013888888889],[11.99986111111111,9.00013888888889]]]},"links":[{"rel":"self","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30/items/Copernicus_DSM_COG_10_N09_00_E011_00_DEM"},{"rel":"canonical","href":"s3://earthsearch-data/cop-dem-glo-30/Copernicus_DSM_COG_10_N09_00_E011_00_DEM/Copernicus_DSM_COG_10_N09_00_E011_00_DEM.json","type":"application/json"},{"rel":"handbook","href":"https://object.cloud.sdsc.edu/v1/AUTH_opentopography/www/metadata/Copernicus_metadata.pdf","type":"application/pdf","title":"Copernicus
+        DEM User handbook","description":"Also includes data usage information"},{"rel":"parent","type":"application/json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30"},{"rel":"collection","type":"application/json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30"},{"rel":"root","type":"application/json","href":"https://earth-search.aws.element84.com/v1"},{"rel":"thumbnail","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30/items/Copernicus_DSM_COG_10_N09_00_E011_00_DEM/thumbnail"}],"assets":{"data":{"href":"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N09_00_E011_00_DEM/Copernicus_DSM_COG_10_N09_00_E011_00_DEM.tif","type":"image/tiff;
+        application=geotiff; profile=cloud-optimized","title":"Data","raster:bands":[{"sampling":"point","data_type":"float32","spatial_resolution":30,"unit":"meter"}],"roles":["data"]}},"bbox":[10.99986111111111,9.00013888888889,11.99986111111111,10.00013888888889],"stac_extensions":["https://stac-extensions.github.io/processing/v1.1.0/schema.json","https://stac-extensions.github.io/grid/v1.1.0/schema.json","https://stac-extensions.github.io/raster/v1.1.0/schema.json","https://stac-extensions.github.io/storage/v1.0.0/schema.json","https://stac-extensions.github.io/projection/v1.1.0/schema.json"],"collection":"cop-dem-glo-30"},{"type":"Feature","stac_version":"1.0.0","id":"Copernicus_DSM_COG_10_N09_00_E010_00_DEM","properties":{"platform":"tandem-x","gsd":30,"proj:epsg":4326,"proj:transform":[0.0002777777777777778,0,9.99986111111111,0,-0.0002777777777777778,10.00013888888889],"proj:shape":[3600,3600],"proj:centroid":{"lat":9.5,"lon":10.5},"grid:code":"CDEM-N09E010","storage:platform":"AWS","storage:region":"eu-central-1","storage:requester_pays":false,"earthsearch:payload_id":"cop-dem-glo/workflow-cop-dem-glo-to-stac/15f274e7fa5c64140d87e6338d5c7116","datetime":"2021-04-22T00:00:00Z","processing:software":{"cop-dem-glo-to-stac":"2023.03.28"},"created":"2023-03-28T15:20:15.989Z","updated":"2023-04-20T18:10:40.839Z"},"geometry":{"type":"Polygon","coordinates":[[[10.99986111111111,9.00013888888889],[10.99986111111111,10.00013888888889],[9.99986111111111,10.00013888888889],[9.99986111111111,9.00013888888889],[10.99986111111111,9.00013888888889]]]},"links":[{"rel":"self","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30/items/Copernicus_DSM_COG_10_N09_00_E010_00_DEM"},{"rel":"canonical","href":"s3://earthsearch-data/cop-dem-glo-30/Copernicus_DSM_COG_10_N09_00_E010_00_DEM/Copernicus_DSM_COG_10_N09_00_E010_00_DEM.json","type":"application/json"},{"rel":"handbook","href":"https://object.cloud.sdsc.edu/v1/AUTH_opentopography/www/metadata/Copernicus_metadata.pdf","type":"application/pdf","title":"Copernicus
+        DEM User handbook","description":"Also includes data usage information"},{"rel":"parent","type":"application/json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30"},{"rel":"collection","type":"application/json","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30"},{"rel":"root","type":"application/json","href":"https://earth-search.aws.element84.com/v1"},{"rel":"thumbnail","href":"https://earth-search.aws.element84.com/v1/collections/cop-dem-glo-30/items/Copernicus_DSM_COG_10_N09_00_E010_00_DEM/thumbnail"}],"assets":{"data":{"href":"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N09_00_E010_00_DEM/Copernicus_DSM_COG_10_N09_00_E010_00_DEM.tif","type":"image/tiff;
+        application=geotiff; profile=cloud-optimized","title":"Data","raster:bands":[{"sampling":"point","data_type":"float32","spatial_resolution":30,"unit":"meter"}],"roles":["data"]}},"bbox":[9.99986111111111,9.00013888888889,10.99986111111111,10.00013888888889],"stac_extensions":["https://stac-extensions.github.io/raster/v1.1.0/schema.json","https://stac-extensions.github.io/projection/v1.1.0/schema.json","https://stac-extensions.github.io/grid/v1.1.0/schema.json","https://stac-extensions.github.io/storage/v1.0.0/schema.json","https://stac-extensions.github.io/processing/v1.1.0/schema.json"],"collection":"cop-dem-glo-30"}],"links":[{"rel":"next","title":"Next
+        page of Items","method":"POST","type":"application/geo+json","href":"https://earth-search.aws.element84.com/v1/search","merge":false,"body":{"collections":["cop-dem-glo-30"],"bbox":[10,10,11,11],"next":"2021-04-22T00:00:00Z,Copernicus_DSM_COG_10_N09_00_E010_00_DEM,cop-dem-glo-30"}},{"rel":"root","type":"application/json","href":"https://earth-search.aws.element84.com/v1"}]}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Length:
+      - '1529'
+      Content-Type:
+      - application/geo+json; charset=utf-8
+      Date:
+      - Tue, 07 Oct 2025 16:45:25 GMT
+      Via:
+      - 1.1 b7dd001578b73a6989e710df24ccc0ce.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - SZpBpC0DRO3ZqnscDGt8n7cKiZ2iOhijFPBRptMMMa2qOdRv8io_PA==
+      X-Amz-Cf-Pop:
+      - IAD55-P10
+      X-Amzn-Trace-Id:
+      - Root=1-68e543a5-404535d579ad7a15763f59cb;Parent=14bbde04e67fc263;Sampled=0;Lineage=1:9e2884e9:0
+      X-Cache:
+      - Miss from cloudfront
+      access-control-allow-origin:
+      - '*'
+      etag:
+      - W/"2e2d-Pn5YCxhSA1We7FpR4pBDkbyjzb4"
+      x-amz-apigw-id:
+      - SFeB-FoXPHcEIOQ=
+      x-amzn-Remapped-content-length:
+      - '11821'
+      x-amzn-RequestId:
+      - cccbf173-c17c-4251-836a-91491a822538
+      x-powered-by:
+      - Express
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"collections": ["cop-dem-glo-30"], "bbox": [10, 10, 11, 11], "next": "2021-04-22T00:00:00Z,Copernicus_DSM_COG_10_N09_00_E010_00_DEM,cop-dem-glo-30"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '149'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.5
+    method: POST
+    uri: https://earth-search.aws.element84.com/v1/search
+  response:
+    body:
+      string: '{"type":"FeatureCollection","stac_version":"1.0.0","stac_extensions":[],"context":{"limit":10,"matched":4,"returned":0},"numberMatched":4,"numberReturned":0,"features":[],"links":[{"rel":"root","type":"application/json","href":"https://earth-search.aws.element84.com/v1"}]}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '273'
+      Content-Type:
+      - application/geo+json; charset=utf-8
+      Date:
+      - Tue, 07 Oct 2025 16:45:26 GMT
+      Via:
+      - 1.1 60fed2a1edb7f0bf722e7271cef9573e.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - udym6kQwrGLWoY07C2pOmj4aYpVGlQHe5nTqT5WvArcJIggppeWu3g==
+      X-Amz-Cf-Pop:
+      - IAD55-P10
+      X-Amzn-Trace-Id:
+      - Root=1-68e543a6-6a4075a37eec57700a9f8890;Parent=2d1f17a0762d1992;Sampled=0;Lineage=1:9e2884e9:0
+      X-Cache:
+      - Miss from cloudfront
+      access-control-allow-origin:
+      - '*'
+      etag:
+      - W/"111-6GY8taxzn3YL44t43wmcY5+qfmI"
+      x-amz-apigw-id:
+      - SFeCBGvovHcEpJw=
+      x-amzn-Remapped-content-length:
+      - '273'
+      x-amzn-RequestId:
+      - c26f5374-7cd4-48c4-8211-90526ea9ba08
+      x-powered-by:
+      - Express
+    status:
+      code: 200
+      message: OK
+version: 1

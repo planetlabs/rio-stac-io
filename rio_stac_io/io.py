@@ -22,6 +22,7 @@ def open(
     asset_key: str,
     use_gti: Literal[False] = False,
     merge_collections: bool = False,
+    infer_projection: bool = False,
     max_items: int = 1000,
     collection: str | None = None,
     crs: str | None = None,
@@ -67,6 +68,9 @@ def open(
         Must be set to False to use the STACIT driver.
     merge_collections : bool, default False
         Combine items from multiple collections into a single dataset.
+    infer_projection : bool, default False
+        Infer projection metadata if missing.
+        This will call the file header of each asset to extract the projection metadata.
     max_items : int, default 1000
         Maximum number of items fetched. 0 means unlimited.
     collection : str or None, optional
@@ -258,6 +262,7 @@ def open(
     asset_key: str,
     use_gti: bool = False,
     merge_collections: bool = False,
+    infer_projection: bool = False,
     zoom_level: int | None = None,
     **kwargs: Any,
 ) -> rio.DatasetReader:
@@ -313,7 +318,13 @@ def open(
             return open_gti(items, asset_key, **kwargs)
 
         else:
-            return open_stacit(items, asset_key, merge_collections, **kwargs)
+            return open_stacit(
+                items,
+                asset_key,
+                merge_collections,
+                infer_projection=infer_projection,
+                **kwargs,
+            )
 
     else:
         return rio.open(items, **kwargs)

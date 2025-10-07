@@ -421,8 +421,10 @@ def _stacta_item(sparse: bool, raster_ext: bool):
         os.remove(f"{path}/{z}/{x}/{y}/item.tif")
         os.remove(f"{path}/{parent.z}/{parent.x}/{parent.y}/item.tif")
 
-    stacta_item.save_object(dest_href=f"stacta-{raster_ext}.json")
+    stacta_item.save_object(dest_href=f"{path}/stacta-{raster_ext}.json")
     yield stacta_item
+
+    os.remove(f"{path}/stacta-{raster_ext}.json")
 
     if not sparse:
         os.remove(f"{path}/{parent.z}/{parent.x}/{parent.y}/item.tif")
