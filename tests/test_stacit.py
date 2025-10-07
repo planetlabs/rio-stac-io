@@ -1,28 +1,32 @@
+import contextlib
+
 import pytest
 import rasterio as rio
 from packaging.version import parse
+from pystac import ItemCollection
 from pystac_client import Client
 from rasterio import __gdal_version__
+from rasterio.errors import RasterioIOError
 
 import rio_stac_io as stacio
 
 
 @pytest.mark.skipif(
-    parse(__gdal_version__) < parse("3.10.0"),
-    reason="Using GTI driver requires GDAL >= 3.10.0",
+    parse(__gdal_version__) >= parse("3.10.0"),
+    reason="STACIT driver identifies as VRT for GDAL < 3.10.0 only",
 )
 def test_stacit_driver_vrt(stac_item_collection):
     with stacio.open(stac_item_collection, asset_key="data") as src:
-        src.driver = "VRT"
+        assert src.driver == "VRT"
 
 
 @pytest.mark.skipif(
-    parse(__gdal_version__) >= parse("3.10.0"),
-    reason="Using GTI driver requires GDAL >= 3.10.0",
+    parse(__gdal_version__) < parse("3.10.0"),
+    reason="STACIT driver identifies as STACIT for GDAL >= 3.10.0 only",
 )
 def test_stacit_driver_stacit(stac_item_collection):
     with stacio.open(stac_item_collection, asset_key="data") as src:
-        src.driver = "STACIT"
+        assert src.driver == "STACIT"
 
 
 @pytest.mark.parametrize(
@@ -127,3 +131,36 @@ def test_open_stacit_overlap(stac_item_collection_overlap, overlap_strategy, exp
                 f"Source bounds: {src.bounds}, expected bounds {bounds}"
             )
         assert len(src.files) == expected
+
+
+@pytest.mark.vcr
+@pytest.mark.parametrize("infer_projection", [True, False])
+def test_open_stacit_no_proj(infer_projection):
+    client = Client.open("https://earth-search.aws.element84.com/v1/")
+    search = client.search(collections=["cop-dem-glo-30"], bbox=[10, 10, 11, 11])
+
+    items = []
+
+    for item in search.items():
+        keys = list(item.properties.keys())
+        for key in keys:
+            if key.startswith("proj:"):
+                item.properties.pop(key)
+        items.append(item)
+
+    if not infer_projection:
+        ctx = pytest.raises(RasterioIOError)
+    else:
+        ctx = contextlib.suppress()
+
+    with ctx:
+        stacio.open(
+            ItemCollection(items), asset_key="data", infer_projection=infer_projection
+        )
+
+
+def test_open_stacit_empty_ic():
+    with pytest.raises(
+        ValueError, match="Cannot open dataset. Got empty ItemCollection."
+    ):
+        stacio.open(ItemCollection([]), asset_key="data")

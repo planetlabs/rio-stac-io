@@ -1,35 +1,37 @@
+import json
 import warnings
 from contextlib import ExitStack
-from tempfile import TemporaryDirectory
 from typing import Any, Iterable, Literal
 
 import rasterio as rio
 from packaging.version import parse
-from pystac import Asset, Item, ItemCollection
+from pystac import Item, ItemCollection
 from pystac_client import ItemSearch
 from rasterio.env import GDALVersion
+from rasterio.errors import RasterioIOError
 
-from rio_stac_io.utils import vsi_href
+from rio_stac_io.utils import infer_projection_metadata, vsi_href
 
 
 def rewrite_item(
-    item: Item, asset_key: str, merge_collections: bool, gdal_version: str
+    item: Item,
+    asset_key: str,
+    merge_collections: bool,
+    gdal_version: str,
+    infer_projection: bool,
 ) -> Item:
-    item = Item(
-        id=item.id,
-        geometry=item.geometry,
-        bbox=item.bbox,
-        datetime=item.datetime,
-        properties=item.properties,
-        stac_extensions=item.stac_extensions,
-        collection=None if merge_collections else item.collection_id,
-        assets={
-            asset_key: Asset(
-                vsi_href(item.assets[asset_key].href),
-                extra_fields=item.assets[asset_key].extra_fields,
-            )
-        },
-    )
+    item.assets[asset_key].href = vsi_href(item.assets[asset_key].href)
+
+    if merge_collections:
+        # STACIT keeps item from different collections in separate subdatasets
+        # We can bypass this by removing the collection reference
+        item.collection = None
+
+    if infer_projection:
+        # Infer projection metadata if missing
+        # This will call the file header of each asset to extract the projection info
+        item = infer_projection_metadata(item, asset_key)
+
     # STACIT driver only starts supporting STAC v1.1.0 starting in GDAL v3.10.2
     # For lower versions, we need to substitute the `proj:code` property
     # with the now deprecated `proj:epsg`` property
@@ -53,6 +55,7 @@ def open_stacit(
     merge_collections: bool,
     overlap_strategy: Literal["REMOVE_IF_NO_NODATA​", "​USE_ALL", "​USE_MOST_RECENT"]
     | None = None,
+    infer_projection: bool = False,
     **profile: Any,
 ) -> rio.DatasetReader:
     stack = ExitStack()
@@ -66,18 +69,28 @@ def open_stacit(
 
     item_collection = ItemCollection(
         items=[
-            rewrite_item(item, asset_key, merge_collections, gdal_version)
+            rewrite_item(
+                item,
+                asset_key,
+                merge_collections=merge_collections,
+                gdal_version=gdal_version,
+                infer_projection=infer_projection,
+            )
             for item in _items
         ]
     )
 
+    if not item_collection.items:
+        raise ValueError("Cannot open dataset. Got empty ItemCollection.")
+
     try:
-        tmp_dir = stack.enter_context(TemporaryDirectory())
-        tmp_path = f"{tmp_dir}/stacit.json"
+        # Write ItemCollection to a temporary in-memory file
+        # this will create a /vsimem/ path that can be used by the STACIT driver
+        tmp_path = stack.enter_context(rio.MemoryFile(ext=".json"))
+        tmp_path.write(json.dumps(item_collection.to_dict()).encode("utf-8"))
+        tmp_path.seek(0)
 
-        item_collection.save_object(dest_href=tmp_path)
-
-        href = f'STACIT:"{tmp_path}":asset={asset_key}'
+        href = f'STACIT:"{tmp_path.name}":asset={asset_key}'
 
         if GDALVersion.runtime() < GDALVersion.parse("3.9.1") and (
             overlap_strategy == "USE_ALL"
@@ -92,6 +105,18 @@ def open_stacit(
         profile["overlap_strategy"] = overlap_strategy
         dataset = rio.open(href, **profile)
 
+    except RasterioIOError as e:
+        stack.close()
+        if str(e) == "No compatible asset found" and not infer_projection:
+            raise RasterioIOError(
+                "No compatible asset found. "
+                "This is likely due to missing projection information "
+                "in the STAC Item or Asset. "
+                "Consider setting the `infer_projection` parameter to `True` "
+                "to infer missing projection information."
+            ) from e
+        else:
+            raise
     except Exception:
         stack.close()
         raise

@@ -1,6 +1,6 @@
-import geopandas as gpd
 import pytest
 from packaging.version import parse
+from pystac import ItemCollection
 from pystac_client import Client
 from rasterio import __gdal_version__
 from rasterio.errors import GDALVersionError
@@ -21,10 +21,12 @@ def test_open_gti_wrong_version(stac_item_collection):
             ...
 
 
-@pytest.mark.skipif(
+pytestmark = pytest.mark.skipif(
     parse(__gdal_version__) < parse("3.10.0"),
-    reason="Using GTI driver requires GDAL >= 3.10.0",
+    reason="Using GTI driver works with GDAL version >= 3.10.0",
 )
+
+
 @pytest.mark.parametrize(
     "item_collection_name,crs,bounds",
     [
@@ -50,15 +52,7 @@ def test_open_gti(item_collection_name, crs, bounds, request):
         assert src.bounds == bounds
         assert len(src.files) == len(item_collection.items)
 
-        path = src.name[4:]
-        gdf = gpd.read_parquet(path)
-        assert len(gdf) == len(item_collection.items)
 
-
-@pytest.mark.skipif(
-    parse(__gdal_version__) < parse("3.10.0"),
-    reason="Using GTI driver requires GDAL >= 3.10.0",
-)
 @pytest.mark.parametrize(
     "item_collection_name,crs,bounds",
     [
@@ -90,15 +84,7 @@ def test_open_gti_reproject(item_collection_name, crs, bounds, request):
             assert val == pytest.approx(bounds[i])
         assert len(src.files) == len(item_collection.items)
 
-        path = src.name[4:]
-        gdf = gpd.read_parquet(path)
-        assert len(gdf) == len(item_collection.items)
 
-
-@pytest.mark.skipif(
-    parse(__gdal_version__) < parse("3.10.0"),
-    reason="Using GTI driver requires GDAL >= 3.10.0",
-)
 @pytest.mark.vcr
 def test_open_gti_search():
     client = Client.open("https://earth-search.aws.element84.com/v1/")
@@ -118,10 +104,6 @@ def test_open_gti_search():
             )
 
 
-@pytest.mark.skipif(
-    parse(__gdal_version__) < parse("3.10.0"),
-    reason="Using GTI driver requires GDAL >= 3.10.0",
-)
 def test_open_gti_overlap(stac_item_collection_overlap):
     bounds = [0, -16, 16, 16]
 
@@ -135,3 +117,28 @@ def test_open_gti_overlap(stac_item_collection_overlap):
                 f"Source bounds: {src.bounds}, expected bounds {bounds}"
             )
         assert len(src.files) == len(stac_item_collection_overlap.items)
+
+
+@pytest.mark.vcr
+def test_open_gti_no_proj():
+    client = Client.open("https://earth-search.aws.element84.com/v1/")
+    search = client.search(collections=["cop-dem-glo-30"], bbox=[10, 10, 11, 11])
+
+    items = []
+
+    for item in search.items():
+        keys = list(item.properties.keys())
+        for key in keys:
+            if key.startswith("proj:"):
+                item.properties.pop(key)
+        items.append(item)
+
+    with stacio.open(ItemCollection(items), asset_key="data", use_gti=True) as src:
+        src.profile
+
+
+def test_open_gti_empty_ic():
+    with pytest.raises(
+        ValueError, match="Cannot open dataset. Got empty ItemCollection."
+    ):
+        stacio.open(ItemCollection([]), asset_key="data", use_gti=True)

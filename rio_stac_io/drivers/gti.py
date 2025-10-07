@@ -1,5 +1,4 @@
 from contextlib import ExitStack
-from tempfile import TemporaryDirectory
 from typing import Any, Iterable
 
 import rasterio as rio
@@ -17,7 +16,6 @@ def open_gti(
     **profile: Any,
 ) -> rio.DatasetReader:
     try:
-        import geopandas as gpd
         from geopandas import GeoDataFrame
         from stac_geoparquet.arrow import parse_stac_items_to_arrow
         from stac_geoparquet.arrow._constants import DEFAULT_PARQUET_SCHEMA_VERSION
@@ -38,16 +36,17 @@ def open_gti(
         _items = item_collection.items
 
     try:
-        tmp_dir = stack.enter_context(TemporaryDirectory())
-        tmp_path = f"{tmp_dir}/gti.parquet"
-
+        # Write ItemCollection to a temporary in-memory Parquet file
+        # This will create a /vsimem/ path that can be used by the GTI driver
+        tmp_path = stack.enter_context(rio.MemoryFile(ext=".parquet"))
         arrow = parse_stac_items_to_arrow(_items)
         gdf = GeoDataFrame.from_arrow(arrow)
         gdf["assets"] = gdf["assets"].apply(rewrite_href)
 
         gdf.to_parquet(tmp_path, schema_version=DEFAULT_PARQUET_SCHEMA_VERSION)
+        tmp_path.seek(0)
 
-        href = f"GTI:{tmp_path}"
+        href = f"GTI:{tmp_path.name}"
         profile.pop("driver", None)
         profile["LOCATION_FIELD"] = f"assets.{asset_key}.href"
         with rio.Env() as env:
@@ -58,22 +57,28 @@ def open_gti(
                 )
         dataset = rio.open(href, **profile)
 
+        # GTI doesn't expose the contributing files
+        # we need to patch the dataset reader to do that
+        class GTIDatasetReader(DatasetReader):
+            @property
+            def files(self) -> list[str]:
+                files: list[str] = (
+                    gdf["assets"].apply(lambda x: x[asset_key]["href"]).to_list()
+                )
+                return files
+
+        dataset.__class__ = GTIDatasetReader
+        dataset._env = stack
+
+    except TypeError as e:
+        stack.close()
+        if "got pyarrow.lib.NullArray" in str(e):
+            raise ValueError("Cannot open dataset. Got empty ItemCollection.") from e
+
+        else:
+            raise
     except Exception:
         stack.close()
         raise
-
-    # GTI doesn't expose the contributing files
-    # we need to patch the dataset reader to do that
-    class GTIDatasetReader(DatasetReader):
-        @property
-        def files(self) -> list[str]:
-            df = gpd.read_parquet(self.name[4:])
-            files: list[str] = (
-                df["assets"].apply(lambda x: x[asset_key]["href"]).to_list()
-            )
-            return files
-
-    dataset.__class__ = GTIDatasetReader
-    dataset._env = stack
 
     return dataset
