@@ -6,74 +6,80 @@ from typing import Any
 
 import rasterio as rio
 from pystac import Item
+from rasterio.env import Env, local
 
 from rio_stac_io.utils import require_gdal_version
 
 
-@require_gdal_version("3.8.2")
-def open_stacta(
-    item: Item,
-    asset_key: str,
-    zoom_level: int | None = None,
-    skip_missing_metatile: bool | None = None,
-    **profile: Any,
-) -> rio.DatasetReader:
-    stack = ExitStack()
+class STACTADatasetReader(rio.DatasetReader):
+    @require_gdal_version("3.8.2")
+    def __init__(
+        self,
+        item: Item,
+        asset_key: str,
+        zoom_level: int | None = None,
+        skip_missing_metatile: bool | None = None,
+        **profile: Any,
+    ) -> None:
+        stack = ExitStack()
 
-    if skip_missing_metatile is None:
-        skip = os.environ.get("GDAL_STACTA_SKIP_MISSING_METATILE")
-        match skip:
-            case "NO", "no":
-                skip_missing_metatile = False
-            case _:
-                skip_missing_metatile = True
+        if skip_missing_metatile is None:
+            skip = os.environ.get("GDAL_STACTA_SKIP_MISSING_METATILE")
+            match skip:
+                case "NO", "no":
+                    skip_missing_metatile = False
+                case _:
+                    skip_missing_metatile = True
 
-    profile["skip_missing_metatile"] = skip_missing_metatile
+        profile["skip_missing_metatile"] = skip_missing_metatile
 
-    if skip_missing_metatile and not any(
-        [ext for ext in item.stac_extensions if "raster" in ext]
-    ):
-        warnings.warn(
-            "SKIP_MISSING_METATILE is set to True "
-            "but STAC raster extension is not used. "
-            "This will likely cause an error.",
-            UserWarning,
-        )
+        if skip_missing_metatile and not any(
+            [ext for ext in item.stac_extensions if "raster" in ext]
+        ):
+            warnings.warn(
+                "SKIP_MISSING_METATILE is set to True "
+                "but STAC raster extension is not used. "
+                "This will likely cause an error.",
+                UserWarning,
+            )
 
-    if zoom_level is not None:
-        for key, matrix_set in item.properties["tiles:tile_matrix_sets"].items():
-            try:
-                matrices = matrix_set["tileMatrices"]
-                id = "id"
-            except KeyError:
-                matrices = matrix_set["tileMatrix"]
-                id = "identifier"
+        if zoom_level is not None:
+            for key, matrix_set in item.properties["tiles:tile_matrix_sets"].items():
+                try:
+                    matrices = matrix_set["tileMatrices"]
+                    id = "id"
+                except KeyError:
+                    matrices = matrix_set["tileMatrix"]
+                    id = "identifier"
 
-            matrix_set["tileMatrices"] = [
-                matrix for matrix in matrices if int(matrix[id]) <= zoom_level
-            ]
+                matrix_set["tileMatrices"] = [
+                    matrix for matrix in matrices if int(matrix[id]) <= zoom_level
+                ]
 
-            max_zoom = max([int(matrix[id]) for matrix in matrix_set["tileMatrices"]])
-
-            if not matrix_set["tileMatrices"] or max_zoom < zoom_level:
-                raise ValueError(
-                    "Requested zoom level is not present in tile matrix set."
+                max_zoom = max(
+                    [int(matrix[id]) for matrix in matrix_set["tileMatrices"]]
                 )
 
-            item.properties["tiles:tile_matrix_sets"][key] = matrix_set
+                if not matrix_set["tileMatrices"] or max_zoom < zoom_level:
+                    raise ValueError(
+                        "Requested zoom level is not present in tile matrix set."
+                    )
 
-    try:
-        tmp_dir = stack.enter_context(TemporaryDirectory())
-        tmp_path = f"{tmp_dir}/stacta.json"
+                item.properties["tiles:tile_matrix_sets"][key] = matrix_set
 
-        item.save_object(dest_href=tmp_path)
+        try:
+            tmp_dir = stack.enter_context(TemporaryDirectory())
+            tmp_path = f"{tmp_dir}/stacta.json"
 
-        href = f'STACTA:"{tmp_path}":{asset_key}'
+            item.save_object(dest_href=tmp_path)
 
-        dataset = rio.open(href, **profile)
-    except Exception:
-        stack.close()
-        raise
+            href = f'STACTA:"{tmp_path}":{asset_key}'
 
-    dataset._env = stack
-    return dataset
+            if not local._env:
+                stack.enter_context(Env.from_defaults())
+            super().__init__(href, **profile)
+            self._env = stack
+
+        except Exception:
+            stack.close()
+            raise

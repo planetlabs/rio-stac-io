@@ -6,9 +6,9 @@ import rasterio as rio
 from pystac import Item, ItemCollection
 from pystac_client import ItemSearch
 
-from rio_stac_io.drivers.gti import open_gti
-from rio_stac_io.drivers.stacit import open_stacit
-from rio_stac_io.drivers.stacta import open_stacta
+from rio_stac_io.drivers.gti import GTIDatasetReader
+from rio_stac_io.drivers.stacit import STACITDatasetReader
+from rio_stac_io.drivers.stacta import STACTADatasetReader
 
 
 @overload
@@ -30,7 +30,7 @@ def open(
     overlap_strategy: Literal[
         "REMOVE_IF_NO_NODATA", "USE_ALL", "USE_MOST_RECENT"
     ] = "REMOVE_IF_NO_NODATA",
-) -> rio.DatasetReader:
+) -> STACITDatasetReader:
     """
     STACIT
 
@@ -111,7 +111,7 @@ def open(
     miny: float | None = None,
     maxx: float | None = None,
     maxy: float | None = None,
-) -> rio.DatasetReader:
+) -> GTIDatasetReader:
     """
     GTI
 
@@ -212,7 +212,7 @@ def open(  # type: ignore[overload-cannot-match]  # passes on macos but not linu
     zoom_level: int | None = None,
     whole_metatile: bool = True,
     skip_missing_metatile: bool = True,
-) -> rio.DatasetReader:
+) -> STACTADatasetReader:
     """
     STACTA
 
@@ -309,16 +309,18 @@ def open(
 
     if isinstance(items, Item):
         if any([ext for ext in items.stac_extensions if "tiled-assets" in ext]):
-            return open_stacta(items, asset_key, zoom_level=zoom_level, **kwargs)
+            return STACTADatasetReader(
+                items, asset_key, zoom_level=zoom_level, **kwargs
+            )
         else:
             return rio.open(items.assets[asset_key].href)
 
     elif isinstance(items, (ItemCollection, ItemSearch)):
         if use_gti:
-            return open_gti(items, asset_key, **kwargs)
+            return GTIDatasetReader(items, asset_key, **kwargs)
 
         else:
-            return open_stacit(
+            return STACITDatasetReader(
                 items,
                 asset_key,
                 merge_collections,
