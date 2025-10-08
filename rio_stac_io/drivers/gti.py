@@ -11,6 +11,8 @@ from rio_stac_io.utils import require_gdal_version, vsi_href
 
 
 class GTIDatasetReader(DatasetReader):
+    links: list[str | None]
+
     @require_gdal_version("3.10.0")
     def __init__(
         self,

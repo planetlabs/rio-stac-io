@@ -12,6 +12,8 @@ from rio_stac_io.utils import require_gdal_version
 
 
 class STACTADatasetReader(rio.DatasetReader):
+    links: list[str | None]
+
     @require_gdal_version("3.8.2")
     def __init__(
         self,
@@ -74,6 +76,8 @@ class STACTADatasetReader(rio.DatasetReader):
             item.save_object(dest_href=tmp_path)
 
             href = f'STACTA:"{tmp_path}":{asset_key}'
+
+            self.links = [item.get_self_href()]
 
             if not local._env:
                 stack.enter_context(Env.from_defaults())

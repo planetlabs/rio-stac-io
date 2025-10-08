@@ -51,6 +51,8 @@ def rewrite_item(
 
 
 class STACITDatasetReader(DatasetReader):
+    links: list[str | None]
+
     def __init__(
         self,
         item_collection: ItemCollection | ItemSearch,
