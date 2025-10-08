@@ -117,6 +117,7 @@ def test_open_gti_overlap(stac_item_collection_overlap):
                 f"Source bounds: {src.bounds}, expected bounds {bounds}"
             )
         assert len(src.files) == len(stac_item_collection_overlap.items)
+        assert len(src.files) == len(src.links)
 
 
 @pytest.mark.vcr

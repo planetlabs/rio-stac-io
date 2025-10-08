@@ -131,6 +131,7 @@ def test_open_stacit_overlap(stac_item_collection_overlap, overlap_strategy, exp
                 f"Source bounds: {src.bounds}, expected bounds {bounds}"
             )
         assert len(src.files) == expected
+        assert len(src.files) == len(src.links)
 
 
 @pytest.mark.vcr
