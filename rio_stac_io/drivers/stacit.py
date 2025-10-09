@@ -26,7 +26,7 @@ def rewrite_item(
     if merge_collections:
         # STACIT keeps item from different collections in separate subdatasets
         # We can bypass this by removing the collection reference
-        item.collection = None
+        item.collection_id = None
 
     if infer_projection:
         # Infer projection metadata if missing

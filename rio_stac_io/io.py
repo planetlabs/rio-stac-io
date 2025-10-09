@@ -323,7 +323,7 @@ def open(
             return STACITDatasetReader(
                 items,
                 asset_key,
-                merge_collections,
+                merge_collections=merge_collections,
                 infer_projection=infer_projection,
                 **kwargs,
             )
