@@ -2,7 +2,6 @@ name: Publish to PyPi
 
 env:
   PIXI_LOCKED: true
-  PIXI_VERSION: 0.52.0
 
 on:
   push:
@@ -14,8 +13,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/prefix-dev/pixi:$PIXI_VERSION
-
+      image: ghcr.io/prefix-dev/pixi:0.52.0
     env:
       TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
       TWINE_REPOSITORY_URL: "https://pypi.org/simple/"
