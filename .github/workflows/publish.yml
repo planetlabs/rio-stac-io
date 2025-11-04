@@ -22,4 +22,5 @@ jobs:
         with:
           cache: true
           pixi-version: v0.59.0
+          run-install: false
       - run: pixi run -e build deploy

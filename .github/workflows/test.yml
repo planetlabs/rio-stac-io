@@ -22,6 +22,7 @@ jobs:
         with:
           cache: true
           pixi-version: v0.59.0
+          run-install: false
       - run: pixi run -e lint lint
 
   test:
@@ -37,6 +38,7 @@ jobs:
         with:
           cache: true
           pixi-version: v0.59.0
+          run-install: false
       - run: apt-get update && apt-get install -y build-essential
       - run: pixi run -e dev-${{ matrix.gdal }} test
         env:
