@@ -1,0 +1,23 @@
+name: Publish to Test PyPi
+
+env:
+  PIXI_LOCKED: true
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+
+  publish:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/prefix-dev/pixi:0.52.0
+    env:
+      TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      TWINE_REPOSITORY_URL: "https://test.pypi.org/simple/"
+    steps:
+      - run: apt-get update && apt-get install -y build-essential git curl jq
+      - uses: actions/checkout@v5
+      - run: pixi run -e build deploy
