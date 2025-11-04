@@ -1,0 +1,18 @@
+name: Docs
+
+env:
+  PIXI_LOCKED: true
+  PIXI_VERSION: 0.52.0
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  docs:
+    runs-on: ghcr.io/prefix-dev/pixi:$PIXI_VERSION
+    steps:
+      - uses: actions/checkout@v5
+      - run: apt-get update && apt-get install -y build-essential git curl jq
+      - run: pixi run -e docs deploy

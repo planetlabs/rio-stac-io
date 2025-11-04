@@ -9,15 +9,14 @@ site_dir: 'build'
 # site info
 repo_name: 'forests/rio-stac-io'
 repo_url: 'https://github.com/planetlabs/rio-stac-io'
-site_url: 'https://planetary-variables.pages.earth.planet.com/forests/rio-stac-io/'
-
+site_url: 'https://planetlabs.github.io/rio-stac-io'
 # social
 extra:
     social:
       - icon: 'material/earth'
-        link: 'https://hello.planet.com/code/planetary-variables/forests'
-      - icon: 'fontawesome/brands/gitlab'
-        link: 'https://hello.planet.com/code/planetary-variables/forests'
+        link: 'https://github.com/planetlabs/'
+      - icon: 'fontawesome/brands/github'
+        link: 'https://github.com/planetlabs/rio-stac-io'
 
 # site navigation
 nav:

@@ -13834,20 +13834,20 @@ packages:
   - pytest-cov>=2.2.0 ; extra == 'test'
   - pytest>=2.8.2 ; extra == 'test'
   - shapely ; extra == 'test'
-  - packaging ; extra == 'all'
-  - ipython>=2.0 ; extra == 'all'
-  - sphinx-rtd-theme ; extra == 'all'
-  - fsspec ; extra == 'all'
-  - matplotlib ; extra == 'all'
-  - ghp-import ; extra == 'all'
-  - hypothesis ; extra == 'all'
-  - pytest-cov>=2.2.0 ; extra == 'all'
-  - pytest>=2.8.2 ; extra == 'all'
-  - shapely ; extra == 'all'
-  - sphinx-click ; extra == 'all'
   - numpydoc ; extra == 'all'
   - boto3>=1.2.4 ; extra == 'all'
+  - hypothesis ; extra == 'all'
+  - ipython>=2.0 ; extra == 'all'
+  - packaging ; extra == 'all'
+  - fsspec ; extra == 'all'
+  - matplotlib ; extra == 'all'
+  - pytest-cov>=2.2.0 ; extra == 'all'
   - sphinx ; extra == 'all'
+  - sphinx-click ; extra == 'all'
+  - sphinx-rtd-theme ; extra == 'all'
+  - shapely ; extra == 'all'
+  - pytest>=2.8.2 ; extra == 'all'
+  - ghp-import ; extra == 'all'
   requires_python: '>=3.9'
 - conda: https://conda.anaconda.org/conda-forge/linux-64/re2-2024.07.02-h9925aae_2.conda
   sha256: d213c44958d49ce7e0d4d5b81afec23640cce5016685dbb2d23571a99caa4474
@@ -14007,7 +14007,7 @@ packages:
 - pypi: ./
   name: rio-stac-io
   version: 0.1.0
-  sha256: aebd8823fb1a1bfd84a84d32c21b1fb98f52173d9c801c3de88eef5822ccd96e
+  sha256: 12d4f456f2f26208f736b860839e111fb7f58390dc15078c0011ffe770e96bbb
   requires_dist:
   - rasterio>=1.4.3
   - pystac>=1.11.0

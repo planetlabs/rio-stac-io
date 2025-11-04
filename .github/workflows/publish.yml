@@ -1,0 +1,23 @@
+name: Publish to PyPi
+
+env:
+  PIXI_LOCKED: true
+  PIXI_VERSION: 0.52.0
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+
+  publish:
+    runs-on: ghcr.io/prefix-dev/pixi:$PIXI_VERSION
+
+    env:
+      TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      TWINE_REPOSITORY_URL: "https://pypi.org/simple/"
+    steps:
+      - uses: actions/checkout@v5
+      - run: apt-get update && apt-get install -y build-essential git curl jq
+      - run: pixi run -e build deploy
