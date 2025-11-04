@@ -15,7 +15,7 @@ jobs:
     env:
       TWINE_USERNAME: "__token__"
       TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
-      TWINE_REPOSITORY_URL: "https://test.pypi.org/simple/"
+      TWINE_REPOSITORY_URL: "https://test.pypi.org/legacy/"
     steps:
       - uses: actions/checkout@v5
       - name: Set up Pixi
