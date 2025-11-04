@@ -37,7 +37,7 @@ jobs:
         with:
           pixi-version: v0.59.0
           run-install: false
-      - run: apt-get update && apt-get install -y build-essential
+      - run: sudo apt-get update && sudo apt-get install -y build-essential
       - run: pixi run -e dev-${{ matrix.gdal }} test
         env:
           PYSTAC_STAC_VERSION_OVERRIDE: ${{ matrix.stac_version }}
