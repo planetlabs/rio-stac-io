@@ -6,7 +6,7 @@ rio-stac-io is a [rasterio](https://github.com/rasterio/rasterio) extension to o
 
 ## Documentation
 
-https://planetary-variables.pages.earth.planet.com/forests/rio-stac-io/
+https://planetlabs.github.io/rio-stac-io
 
 
 ## Installation
