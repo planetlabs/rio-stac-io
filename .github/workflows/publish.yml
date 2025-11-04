@@ -12,7 +12,9 @@ on:
 jobs:
 
   publish:
-    runs-on: ghcr.io/prefix-dev/pixi:$PIXI_VERSION
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/prefix-dev/pixi:$PIXI_VERSION
 
     env:
       TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}

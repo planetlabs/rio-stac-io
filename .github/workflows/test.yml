@@ -15,14 +15,18 @@ on:
 
 jobs:
   lint:
-    runs-on: ghcr.io/prefix-dev/pixi:$PIXI_VERSION
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/prefix-dev/pixi:$PIXI_VERSION
     steps:
       - uses: actions/checkout@v5
       - run: apt-get update && apt-get install -y build-essential git curl jq
       - run: pixi run -e lint lint
 
   test:
-    runs-on: ghcr.io/prefix-dev/pixi:$PIXI_VERSION
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/prefix-dev/pixi:$PIXI_VERSION
     strategy:
       matrix:
         GDAL: [gdal38, gdal39, gdal310, gdal311]
