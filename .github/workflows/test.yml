@@ -18,8 +18,8 @@ jobs:
     container:
       image: ghcr.io/prefix-dev/pixi:0.52.0
     steps:
-      - uses: actions/checkout@v5
       - run: apt-get update && apt-get install -y build-essential git curl jq
+      - uses: actions/checkout@v5
       - run: pixi run -e lint lint
 
   test:
