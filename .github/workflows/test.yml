@@ -22,6 +22,7 @@ jobs:
       - run: pixi run -e lint lint
         env:
           PATH: /home/runner/.pixi/bin:$PATH
+          CONDA_OVERRIDE_GLIBC: "2.17"
 
   test:
     runs-on: ubuntu-latest
