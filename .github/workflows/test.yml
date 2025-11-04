@@ -31,6 +31,6 @@ jobs:
         GDAL: [gdal38, gdal39, gdal310, gdal311]
         PYSTAC_STAC_VERSION_OVERRIDE: ["1.0.0", "1.1.0"]
     steps:
-      - uses: actions/checkout@v5
       - run: apt-get update && apt-get install -y build-essential git curl jq
+      - uses: actions/checkout@v5
       - run: pixi run -e dev-$GDAL test

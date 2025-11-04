@@ -18,6 +18,6 @@ jobs:
       TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
       TWINE_REPOSITORY_URL: "https://pypi.org/simple/"
     steps:
-      - uses: actions/checkout@v5
       - run: apt-get update && apt-get install -y build-essential git curl jq
+      - uses: actions/checkout@v5
       - run: pixi run -e build deploy
