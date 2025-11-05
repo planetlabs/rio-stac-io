@@ -2,6 +2,8 @@
 authors = [{ name = "Thomas Maschler", email = "thomas.maschler@planet.com" }]
 name = "rio-stac-io"
 requires-python = ">= 3.10"
+description = "A rasterio extension to open STAC Items and ItemCollections using native GDAL drivers"
+readme = "README.md"
 version = "0.1.0"
 dependencies = [
     "rasterio>=1.4.3",
