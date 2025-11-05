@@ -12,7 +12,6 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     env:
       TWINE_USERNAME: "__token__"
       TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
