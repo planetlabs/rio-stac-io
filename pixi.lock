@@ -14007,7 +14007,7 @@ packages:
 - pypi: ./
   name: rio-stac-io
   version: 0.1.0
-  sha256: 12d4f456f2f26208f736b860839e111fb7f58390dc15078c0011ffe770e96bbb
+  sha256: 824515e100b48dfcf2e42efea5899aac35f6324a73051e62dba20bc66d9d27da
   requires_dist:
   - rasterio>=1.4.3
   - pystac>=1.11.0
