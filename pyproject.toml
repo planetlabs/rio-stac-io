@@ -116,7 +116,7 @@ livereload = ">=2.6.3"
 
 [tool.pixi.feature.docs.tasks]
 localdocs = "mkdocs serve"
-deploy = "mkdocs gh-deploy"
+deploy = "mkdocs gh-deploy --force"
 
 ######## Pixi/ Hatch Build
 

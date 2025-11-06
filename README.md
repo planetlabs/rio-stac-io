@@ -1,6 +1,6 @@
 # rio-stac-io
 
-![From Metadata to Pixels](docs/img/rio-stac-io.png "rio-stac-io")
+![From Metadata to Pixels](https://github.com/planetlabs/rio-stac-io/raw/main/docs/img/rio-stac-io.png "rio-stac-io")
 
 rio-stac-io is a [rasterio](https://github.com/rasterio/rasterio) extension to open STAC Items and ItemCollections using native GDAL drivers including [STACIT](https://gdal.org/en/stable/drivers/raster/stacit.html), [STACTA](https://gdal.org/en/stable/drivers/raster/stacta.html) and [GTI](https://gdal.org/en/stable/drivers/raster/gti.html). The library is build on top of rasterio and pystac.
 
