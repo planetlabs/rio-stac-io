@@ -8,9 +8,13 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   docs:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v5
       - name: Set up Pixi
