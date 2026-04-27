@@ -41,3 +41,19 @@ jobs:
       - run: pixi run -e dev-${{ matrix.gdal }} test
         env:
           PYSTAC_STAC_VERSION_OVERRIDE: ${{ matrix.stac_version }}
+
+  # Conda env without libgdal-arrow-parquet so GDAL has no Parquet driver; exercises
+  # GTI SystemError -> STACIT in tests/test_geodataframe.py (clean pixi in CI, no driver cache).
+  test-dev-gdal311-noparquet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
+        with:
+          pixi-version: v0.59.0
+          run-install: false
+      - run: sudo apt-get update && sudo apt-get install -y build-essential
+      - run: pixi run -e dev-gdal311-noparquet test-ci tests/test_geodataframe.py
+        env:
+          PYSTAC_STAC_VERSION_OVERRIDE: "1.1.0"

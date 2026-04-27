@@ -1,20 +1,27 @@
-from typing import Annotated, Any, Literal, overload
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Annotated, Any, Literal, overload
 
 import pystac
 import pystac_client
 import rasterio as rio
 from pystac import Item, ItemCollection
 from pystac_client import ItemSearch
+from rasterio.errors import GDALVersionError
 
 from rio_stac_io.drivers.gti import GTIDatasetReader
 from rio_stac_io.drivers.stacit import STACITDatasetReader
 from rio_stac_io.drivers.stacta import STACTADatasetReader
+from rio_stac_io.utils import is_geodataframe
+
+if TYPE_CHECKING:
+    from geopandas import GeoDataFrame
 
 
 @overload
 def open(
     items: Annotated[
-        pystac.ItemCollection | pystac_client.ItemSearch,
+        pystac.ItemCollection | pystac_client.ItemSearch | GeoDataFrame,
         "STAC Items must implement the Projection STAC extension",
     ],
     mode: Literal["r"] = "r",
@@ -94,7 +101,7 @@ def open(
 @overload
 def open(
     items: Annotated[
-        pystac.ItemCollection | pystac_client.ItemSearch,
+        pystac.ItemCollection | pystac_client.ItemSearch | GeoDataFrame,
         "STAC Items must implement the Projection STAC extension",
     ],
     mode: Literal["r"] = "r",
@@ -256,7 +263,7 @@ def open(  # type: ignore[overload-cannot-match]  # passes on macos but not linu
 
 
 def open(
-    items: Item | ItemCollection | ItemSearch,
+    items: Item | ItemCollection | ItemSearch | GeoDataFrame,
     mode: Literal["r"] = "r",
     *,
     asset_key: str,
@@ -328,5 +335,20 @@ def open(
                 **kwargs,
             )
 
+    elif is_geodataframe(items):
+        # For GeoDataFrame input, first try the GTI driver, then STACIT if GTI
+        # cannot be used: GDAL too old, missing Parquet, etc. (see
+        # GTIDatasetReader and drivers.gti). ImportError is not caught (missing
+        # [gti] extras should fail fast).
+        try:
+            return GTIDatasetReader(items, asset_key, **kwargs)
+        except (SystemError, GDALVersionError):
+            return STACITDatasetReader(
+                items,
+                asset_key,
+                merge_collections=merge_collections,
+                infer_projection=infer_projection,
+                **kwargs,
+            )
     else:
         return rio.open(items, **kwargs)

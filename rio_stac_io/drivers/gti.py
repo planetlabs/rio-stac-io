@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from contextlib import ExitStack
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 
 import rasterio as rio
 from pystac import Item, ItemCollection
@@ -9,6 +11,9 @@ from rasterio.env import Env, local
 
 from rio_stac_io.utils import require_gdal_version, vsi_href
 
+if TYPE_CHECKING:
+    from geopandas import GeoDataFrame
+
 
 class GTIDatasetReader(DatasetReader):
     links: list[str | None]
@@ -16,7 +21,7 @@ class GTIDatasetReader(DatasetReader):
     @require_gdal_version("3.10.0")
     def __init__(
         self,
-        item_collection: ItemCollection | ItemSearch,
+        item_collection: ItemCollection | ItemSearch | GeoDataFrame,
         asset_key: str,
         **profile: Any,
     ) -> None:
@@ -24,6 +29,7 @@ class GTIDatasetReader(DatasetReader):
             from geopandas import GeoDataFrame
             from stac_geoparquet.arrow import parse_stac_items_to_arrow
             from stac_geoparquet.arrow._constants import DEFAULT_PARQUET_SCHEMA_VERSION
+            from stac_geoparquet.stac_geoparquet import SELF_LINK_COLUMN
         except ImportError as e:
             raise ImportError(
                 "Missing extra modules. Please install package with as rio-stac-io[gti]"
@@ -40,21 +46,34 @@ class GTIDatasetReader(DatasetReader):
             assets[asset_key]["href"] = vsi_href(assets[asset_key]["href"])
             return assets
 
-        stack = ExitStack()
+        if isinstance(item_collection, GeoDataFrame):
+            gdf = item_collection
 
-        if isinstance(item_collection, ItemSearch):
-            _items: Iterable[Item] = item_collection.items()
         else:
-            _items = item_collection.items
+            if isinstance(item_collection, ItemSearch):
+                _items: Iterable[Item] = item_collection.items()
+            else:
+                _items = item_collection.items
+            try:
+                arrow = parse_stac_items_to_arrow(_items)
+                gdf = GeoDataFrame.from_arrow(arrow)
+            except TypeError as e:
+                if "got pyarrow.lib.NullArray" in str(e):
+                    raise ValueError(
+                        "Cannot open dataset. Got empty ItemCollection."
+                    ) from e
+
+                else:
+                    raise
+
+        gdf["assets"] = gdf["assets"].apply(rewrite_href)
+
+        stack = ExitStack()
+        # Write ItemCollection to a temporary in-memory Parquet file
+        # This will create a /vsimem/ path that can be used by the GTI driver
+        tmp_path = stack.enter_context(rio.MemoryFile(ext=".parquet"))
 
         try:
-            # Write ItemCollection to a temporary in-memory Parquet file
-            # This will create a /vsimem/ path that can be used by the GTI driver
-            tmp_path = stack.enter_context(rio.MemoryFile(ext=".parquet"))
-            arrow = parse_stac_items_to_arrow(_items)
-            gdf = GeoDataFrame.from_arrow(arrow)
-            gdf["assets"] = gdf["assets"].apply(rewrite_href)
-
             gdf.to_parquet(tmp_path, schema_version=DEFAULT_PARQUET_SCHEMA_VERSION)
             tmp_path.seek(0)
 
@@ -65,7 +84,13 @@ class GTIDatasetReader(DatasetReader):
             self._files: list[str] = (
                 gdf["assets"].apply(lambda x: x[asset_key]["href"]).to_list()
             )
-            self.links = [item.get_self_href() for item in _items]
+            if isinstance(item_collection, GeoDataFrame):
+                if SELF_LINK_COLUMN in gdf.columns:
+                    self.links = gdf[SELF_LINK_COLUMN].tolist()
+                else:
+                    self.links = [None] * len(gdf)
+            else:
+                self.links = [item.get_self_href() for item in _items]
 
             if not local._env:
                 stack.enter_context(Env.from_defaults())
@@ -74,15 +99,6 @@ class GTIDatasetReader(DatasetReader):
 
             self._env = stack
 
-        except TypeError as e:
-            stack.close()
-            if "got pyarrow.lib.NullArray" in str(e):
-                raise ValueError(
-                    "Cannot open dataset. Got empty ItemCollection."
-                ) from e
-
-            else:
-                raise
         except Exception:
             stack.close()
             raise

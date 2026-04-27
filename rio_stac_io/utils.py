@@ -28,6 +28,23 @@ def require_gdal_version(gdal_version: str) -> Callable:
     return decorator
 
 
+def is_geodataframe(obj: object) -> bool:
+    """True if *obj* is a :class:`geopandas.GeoDataFrame` (or a subclass of it).
+
+    The check uses the class MRO and the defining module, so
+    *geopandas* is never imported unless some other code path has already
+    loaded it. That keeps *geopandas* optional for users who only use
+    :mod:`pystac` / :mod:`pystac_client` inputs.
+    """
+    for cls in type(obj).__mro__:
+        if (
+            cls.__name__ == "GeoDataFrame"
+            and (getattr(cls, "__module__", "") or "") == "geopandas.geodataframe"
+        ):
+            return True
+    return False
+
+
 def vsi_href(href: str) -> str:
     if href.startswith("http"):
         href = f"/vsicurl/{href}"
