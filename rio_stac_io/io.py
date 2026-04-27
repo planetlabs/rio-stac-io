@@ -273,8 +273,11 @@ def open(
     zoom_level: int | None = None,
     **kwargs: Any,
 ) -> rio.DatasetReader:
-    """rio-stac-io accepts any pystac Item, ItemCollection or ItemSearch
-    and returns a rasterio DatasetReader.
+    """rio-stac-io accepts a pystac `Item`, `ItemCollection` or `ItemSearch`,
+    or a **STAC-compliant** `geopandas.GeoDataFrame` (same item layout as
+    [stac-geoparquet](https://github.com/stac-utils/stac-geoparquet), e.g. from
+    `geopandas.read_parquet` on STAC GeoParquet), and returns a rasterio
+    DatasetReader.
     Input items will be merged into a single layer,
     similar to a VRT and served as a single rasterio Dataset.
     If you need to read time series,
@@ -304,6 +307,11 @@ def open(
     When provided with a single Item as input, it will use the
     STACTA driver if the item uses the tiled-asset STAC extension
     and rasterio when using a regular item.
+
+    For a **STAC-compliant GeoDataFrame**, the flow is different: the **GTI**
+    driver is tried first, then **STACIT** is used if GTI fails (e.g. GDAL
+    without GeoParquet, or GDAL too old for GTI). The **`use_gti` argument is
+    ignored** for GeoDataFrame input.
 
     See overloaded function signatures for details.
 

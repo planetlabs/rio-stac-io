@@ -4,7 +4,7 @@
 
 ## About
 
-rio-stac-io is a [rasterio](https://github.com/rasterio/rasterio) extension to open STAC Items and ItemCollections using native GDAL drivers including [STACIT](https://gdal.org/en/stable/drivers/raster/stacit.html), [STACTA](https://gdal.org/en/stable/drivers/raster/stacta.html) and [GTI](https://gdal.org/en/stable/drivers/raster/gti.html). The library is build on top of rasterio and pystac.
+rio-stac-io is a [rasterio](https://github.com/rasterio/rasterio) extension to open STAC Items, `ItemCollection` / `ItemSearch` results, and **STAC‑compliant [geopandas](https://geopandas.org/) `GeoDataFrame`s** (for example from [STAC GeoParquet](https://github.com/stac-utils/stac-geoparquet)), using native GDAL drivers including [STACIT](https://gdal.org/en/stable/drivers/raster/stacit.html), [STACTA](https://gdal.org/en/stable/drivers/raster/stacta.html) and [GTI](https://gdal.org/en/stable/drivers/raster/gti.html). The library is build on top of rasterio and pystac.
 
 ## Installation and System requirements
 
@@ -88,3 +88,41 @@ metadata (if present) to infer datatype and no data value. When using sparse til
 #### STAC Item
 
 A regular STAC Item can be opened directly with rasterio.
+
+#### GeoDataFrame (STAC GeoParquet and compatible tables)
+
+You can pass a **`GeoDataFrame`** as long as its rows are **STAC items in the layout produced by [stac-geoparquet](https://github.com/stac-utils/stac-geoparquet)** (top-level item fields, `assets`, `properties`, and geometry). Typical sources are `geopandas.read_parquet(...)` on STAC GeoParquet, or `stac_geoparquet.to_geodataframe(...)` from a list of item dicts.
+
+For a **`GeoDataFrame`**, the library always tries the **GTI** driver first, then falls back to **STACIT** if GTI cannot be used (for example GDAL without GeoParquet support, or GDAL &lt; 3.10 for GTI, or a `GDALVersionError` from the GTI path). The **`use_gti`** argument to `open` is **ignored** for this input type—there is no way to request STACIT only; the fallback is automatic. The **`gti` extra** (`rio-stac-io[gti]`, which brings in `stac-geoparquet` and friends) is required to convert a `GeoDataFrame` into a dataset.
+
+Filter or subset the frame **before** calling `open`—only the remaining rows are used as the mosaic input.
+
+```python
+import geopandas as gpd
+import rio_stac_io as stacio
+
+# e.g. STAC GeoParquet on disk or URL understood by geopandas/fiona
+gdf = gpd.read_parquet("stac_layer.parquet")
+
+# Example: keep one collection and a spatial subset (requires a geometry column)
+gdf = gdf[gdf["collection"] == "my-sentinel2-collection"]
+gdf = gdf.cx[-5:10, 41:52]
+
+with stacio.open(gdf, asset_key="data") as src:
+    print(src.profile)
+    data = src.read()
+```
+
+The `collection` field exists when items were written with a collection id; use any valid boolean indexing that preserves STAC item columns. If you only need tabular fields, a simple filter is enough:
+
+```python
+gdf = gpd.read_parquet("stac_layer.parquet")
+gdf = gdf[gdf["id"].isin({"item-a", "item-b"})]
+
+with stacio.open(
+    gdf, asset_key="cog", merge_collections=True, infer_projection=False
+) as src:
+    _ = src.bounds
+```
+
+See also the overloads in `rio_stac_io.open` for GTI- and STACIT-specific options passed through to the underlying drivers.
