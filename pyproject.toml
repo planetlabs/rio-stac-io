@@ -33,6 +33,7 @@ dev-gdal38 = { features = ["gti", "dev", "lint", "gdal-38"], solve-group = "gdal
 dev-gdal39 = { features = ["gti", "dev", "lint", "gdal-39"], solve-group = "gdal-39" }
 dev-gdal310 = { features = ["gti", "dev", "lint", "gdal-310"], solve-group = "gdal-310" }
 dev-gdal311 = { features = ["gti", "dev", "lint", "gdal-311"], solve-group = "gdal-311" }
+dev-gdal312 = { features = ["gti", "dev", "lint", "gdal-312"], solve-group = "gdal-312" }
 dev-gdal311-noparquet = { features = ["gti", "dev", "lint", "gdal-311-noparquet"], solve-group = "gdal-311-noparquet" }
 lint = { features = ["lint"], solve-group = "lint", no-default-feature = true }
 docs = { features = ["docs"], solve-group = "docs", no-default-feature = true  }
@@ -66,6 +67,14 @@ libexpat = "*"
 
 [tool.pixi.feature.gdal-311.dependencies]
 libgdal = "==3.11.4"
+libgdal-arrow-parquet = "*"
+proj = ">=9"
+libexpat = "*"
+
+######## Pixi/ GDAL 3.12
+
+[tool.pixi.feature.gdal-312.dependencies]
+libgdal = "==3.12.3"
 libgdal-arrow-parquet = "*"
 proj = ">=9"
 libexpat = "*"
