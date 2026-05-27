@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Any, Callable
+from typing import Any, Callable, Sequence
 
 import rasterio as rio
 from packaging.version import parse
@@ -9,16 +9,33 @@ from rasterio import __gdal_version__
 from rasterio.errors import GDALVersionError
 
 
-def require_gdal_version(gdal_version: str) -> Callable:
+def gdal_version_blocked(runtime_version: str, exclude: Sequence[str]) -> bool:
+    runtime = parse(runtime_version)
+    return any(runtime == parse(spec) for spec in exclude)
+
+
+def require_gdal_version(
+    gdal_version: str,
+    *,
+    exclude: Sequence[str] | None = None,
+) -> Callable:
+    excluded = tuple(exclude or ())
+
     def decorator(function: Callable) -> Callable:
         @wraps(function)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            runtime = parse(__gdal_version__)
-            required = parse(gdal_version)
+            runtime_str = __gdal_version__
+            runtime = parse(runtime_str)
 
-            if not runtime >= required:
+            if runtime < parse(gdal_version):
                 raise GDALVersionError(
                     f"Selected Driver requires GDAL Version {gdal_version} or higher."
+                )
+
+            if excluded and gdal_version_blocked(runtime_str, excluded):
+                raise GDALVersionError(
+                    f"Selected Driver is not supported on GDAL {runtime_str} "
+                    f"(excluded: {', '.join(excluded)})."
                 )
 
             return function(*args, **kwargs)

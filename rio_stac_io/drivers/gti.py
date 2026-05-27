@@ -4,12 +4,16 @@ from contextlib import ExitStack
 from typing import TYPE_CHECKING, Any, Iterable
 
 import rasterio as rio
+from packaging.version import parse
 from pystac import Item, ItemCollection
 from pystac_client import ItemSearch
-from rasterio import DatasetReader
+from rasterio import DatasetReader, __gdal_version__
 from rasterio.env import Env, local
 
 from rio_stac_io.utils import require_gdal_version, vsi_href
+
+# https://github.com/OSGeo/gdal/issues/14674
+_GTI_EXCLUDED_GDAL = ("3.12.2", "3.12.3", "3.12.4")
 
 if TYPE_CHECKING:
     from geopandas import GeoDataFrame
@@ -18,7 +22,7 @@ if TYPE_CHECKING:
 class GTIDatasetReader(DatasetReader):
     links: list[str | None]
 
-    @require_gdal_version("3.10.0")
+    @require_gdal_version("3.10.0", exclude=_GTI_EXCLUDED_GDAL)
     def __init__(
         self,
         item_collection: ItemCollection | ItemSearch | GeoDataFrame,
@@ -43,12 +47,14 @@ class GTIDatasetReader(DatasetReader):
                 )
 
         def rewrite_href(assets: dict[str, Any]) -> dict[str, Any]:
-            assets[asset_key]["href"] = vsi_href(assets[asset_key]["href"])
-            return assets
+            new_asset = {
+                **assets[asset_key],
+                "href": vsi_href(assets[asset_key]["href"]),
+            }
+            return {**assets, asset_key: new_asset}
 
         if isinstance(item_collection, GeoDataFrame):
             gdf = item_collection
-
         else:
             if isinstance(item_collection, ItemSearch):
                 _items: Iterable[Item] = item_collection.items()
@@ -62,28 +68,37 @@ class GTIDatasetReader(DatasetReader):
                     raise ValueError(
                         "Cannot open dataset. Got empty ItemCollection."
                     ) from e
+                raise
 
-                else:
-                    raise
+        if gdf.empty:
+            raise ValueError("Cannot open dataset. Got empty input.")
 
-        gdf["assets"] = gdf["assets"].apply(rewrite_href)
+        self._files: list[str] = (
+            gdf["assets"].apply(lambda x: x[asset_key]["href"]).to_list()
+        )
+
+        # GDAL 3.12+ GTI handles gs:// directly; keep those hrefs untouched.
+        # For older versions, build a separate frame with /vsi-prefixed hrefs
+        # for the parquet payload only — never mutate the caller's GeoDataFrame.
+        if parse(__gdal_version__) < parse("3.12.0"):
+            parquet_gdf = gdf.copy()
+            parquet_gdf["assets"] = parquet_gdf["assets"].apply(rewrite_href)
+        else:
+            parquet_gdf = gdf
 
         stack = ExitStack()
-        # Write ItemCollection to a temporary in-memory Parquet file
-        # This will create a /vsimem/ path that can be used by the GTI driver
         tmp_path = stack.enter_context(rio.MemoryFile(ext=".parquet"))
 
         try:
-            gdf.to_parquet(tmp_path, schema_version=DEFAULT_PARQUET_SCHEMA_VERSION)
+            parquet_gdf.to_parquet(
+                tmp_path, schema_version=DEFAULT_PARQUET_SCHEMA_VERSION
+            )
             tmp_path.seek(0)
 
             href = f"GTI:{tmp_path.name}"
             profile.pop("driver", None)
             profile["LOCATION_FIELD"] = f"assets.{asset_key}.href"
 
-            self._files: list[str] = (
-                gdf["assets"].apply(lambda x: x[asset_key]["href"]).to_list()
-            )
             if isinstance(item_collection, GeoDataFrame):
                 if SELF_LINK_COLUMN in gdf.columns:
                     self.links = gdf[SELF_LINK_COLUMN].tolist()

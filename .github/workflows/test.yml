@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        gdal: [gdal38, gdal39, gdal310, gdal311, gdal312]
+        gdal: [gdal38, gdal39, gdal310, gdal311, gdal312, gdal313]
         stac_version: ["1.0.0", "1.1.0"]
     steps:
       - uses: actions/checkout@v5

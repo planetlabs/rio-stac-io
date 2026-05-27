@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING, Annotated, Any, Literal, overload
 
 import pystac
@@ -33,7 +34,7 @@ def open(
     max_items: int = 1000,
     collection: str | None = None,
     crs: str | None = None,
-    resolution: Literal["AVERAGE", "HIGHEST", "​LOWEST"] = "AVERAGE",
+    resolution: Literal["AVERAGE", "HIGHEST", "LOWEST"] = "AVERAGE",
     overlap_strategy: Literal[
         "REMOVE_IF_NO_NODATA", "USE_ALL", "USE_MOST_RECENT"
     ] = "REMOVE_IF_NO_NODATA",
@@ -311,7 +312,12 @@ def open(
     For a **STAC-compliant GeoDataFrame**, the flow is different: the **GTI**
     driver is tried first, then **STACIT** is used if GTI fails (e.g. GDAL
     without GeoParquet, or GDAL too old for GTI). The **`use_gti` argument is
-    ignored** for GeoDataFrame input.
+    ignored** for GeoDataFrame input. The `merge_collections` and
+    `infer_projection` arguments only apply to the STACIT fallback; on the
+    GTI path GTI always merges across collections and reprojects on the fly,
+    so those flags are no-ops there (a warning is emitted when GTI is
+    selected and a non-default `infer_projection`/`merge_collections` was
+    passed).
 
     See overloaded function signatures for details.
 
@@ -349,7 +355,7 @@ def open(
         # GTIDatasetReader and drivers.gti). ImportError is not caught (missing
         # [gti] extras should fail fast).
         try:
-            return GTIDatasetReader(items, asset_key, **kwargs)
+            reader = GTIDatasetReader(items, asset_key, **kwargs)
         except (SystemError, GDALVersionError):
             return STACITDatasetReader(
                 items,
@@ -358,5 +364,16 @@ def open(
                 infer_projection=infer_projection,
                 **kwargs,
             )
+
+        if infer_projection or merge_collections:
+            warnings.warn(
+                "GTI always merges items across collections and reprojects on "
+                "the fly; `merge_collections` and `infer_projection` are "
+                "ignored on the GTI path. Pass a GeoDataFrame whose rows are "
+                "all from one collection / projection if you need split "
+                "subdatasets via STACIT.",
+                stacklevel=2,
+            )
+        return reader
     else:
         return rio.open(items, **kwargs)

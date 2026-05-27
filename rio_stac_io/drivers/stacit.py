@@ -70,8 +70,6 @@ class STACITDatasetReader(DatasetReader):
     ) -> None:
         stack = ExitStack()
 
-        gdal_version = rio.__gdal_version__
-
         if is_geodataframe(item_collection):
             gdf = cast(Any, item_collection)
             try:
@@ -105,7 +103,7 @@ class STACITDatasetReader(DatasetReader):
                         Item.from_dict(to_dict(record), migrate=False),
                         asset_key,
                         merge_collections,
-                        gdal_version,
+                        __gdal_version__,
                         infer_projection,
                     )
                     for record in _gdf.to_dict(orient="records")
@@ -127,7 +125,7 @@ class STACITDatasetReader(DatasetReader):
                         item,
                         asset_key,
                         merge_collections=merge_collections,
-                        gdal_version=gdal_version,
+                        gdal_version=__gdal_version__,
                         infer_projection=infer_projection,
                     )
                     for item in _items

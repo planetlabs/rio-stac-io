@@ -52,10 +52,33 @@ with stacio.open(gdf, asset_key="cog") as src:
 
 ## Development
 
-This repository requires [Pixi](https://pixi.sh/latest/) v0.52.0 or later.
+This repository requires [Pixi](https://pixi.sh/latest/) v0.67.2 or later.
 
 ```
 git clone git@github.com:planetlabs/rio-stac-io.git
 cd rio-stac-io
 pixi shell -e dev
 ```
+
+Multiple Pixi environments pin different `libgdal` versions (e.g. `dev`, `dev-gdal310`, `dev-gdal312`, `dev-gdal313`, `dev-gdal311-noparquet`; see `pyproject.toml` for the full list). Rasterio is installed from source (`[tool.pixi.pypi-options] no-binary = ["rasterio"]`) so it links against the conda GDAL in that environment.
+
+### Troubleshooting: rasterio linked to the wrong GDAL
+
+Switching between any two GDAL environments locally (for example moving between any of the `dev-gdal*` variants) can leave Pixi's PyPI/build cache holding a rasterio build compiled against a different `libgdal`. Symptoms include odd GTI or CRS failures, or `rasterio.__gdal_version__` not matching `gdalinfo --version` in the same shell.
+
+Check:
+
+```
+pixi run -e <env> verify-gdal
+```
+
+If that fails, clear the cached build and reinstall the environment (not usually needed on CI—runners are isolated per job):
+
+```
+pixi clean cache --pypi --build -y
+rm -rf .pixi/envs/<env>
+pixi install -e <env>
+pixi run -e <env> verify-gdal
+```
+
+Replace `<env>` with the environment you use (`dev`, `dev-gdal310`, `dev-gdal312`, `dev-gdal313`, `dev-gdal311-noparquet`, …).
