@@ -33,6 +33,9 @@ dev-gdal38 = { features = ["gti", "dev", "lint", "gdal-38"], solve-group = "gdal
 dev-gdal39 = { features = ["gti", "dev", "lint", "gdal-39"], solve-group = "gdal-39" }
 dev-gdal310 = { features = ["gti", "dev", "lint", "gdal-310"], solve-group = "gdal-310" }
 dev-gdal311 = { features = ["gti", "dev", "lint", "gdal-311"], solve-group = "gdal-311" }
+dev-gdal312 = { features = ["gti", "dev", "lint", "gdal-312"], solve-group = "gdal-312" }
+dev-gdal313 = { features = ["gti", "dev", "lint", "gdal-313"], solve-group = "gdal-313" }
+dev-gdal311-noparquet = { features = ["gti", "dev", "lint", "gdal-311-noparquet"], solve-group = "gdal-311-noparquet" }
 lint = { features = ["lint"], solve-group = "lint", no-default-feature = true }
 docs = { features = ["docs"], solve-group = "docs", no-default-feature = true  }
 build = { features = ["build"], solve-group = "build",  no-default-feature = true  }
@@ -69,6 +72,29 @@ libgdal-arrow-parquet = "*"
 proj = ">=9"
 libexpat = "*"
 
+######## Pixi/ GDAL 3.12
+
+[tool.pixi.feature.gdal-312.dependencies]
+libgdal = "==3.12.1"
+libgdal-arrow-parquet = "*"
+proj = ">=9"
+libexpat = "*"
+
+######## Pixi/ GDAL 3.13
+
+[tool.pixi.feature.gdal-313.dependencies]
+libgdal = "==3.13.0"
+libgdal-arrow-parquet = "*"
+proj = ">=9"
+libexpat = "*"
+
+# Same GDAL 3.11 as gdal-311 but without the libgdal-arrow-parquet metapackage.
+# CI uses it to verify the solve; Parquet may still appear in GDAL depending on the build.
+[tool.pixi.feature.gdal-311-noparquet.dependencies]
+libgdal = "==3.11.4"
+proj = ">=9"
+libexpat = "*"
+
 ######## Pixi/ DEV
 
 [tool.pixi.feature.dev.pypi-dependencies]
@@ -83,6 +109,11 @@ morecantile = ">6.1.0"
 [tool.pixi.feature.dev.tasks]
 test = "pytest --record-mode=once"
 test-ci = "pytest --record-mode=none"
+verify-gdal = { cmd = [
+  "python",
+  "-c",
+  "import re, subprocess, sys, rasterio as r; g=r.__gdal_version__; o=subprocess.check_output(['gdalinfo','--version'],text=True); m=re.search('GDAL (\\d+\\.\\d+\\.\\d+)', o); sys.exit('unparseable gdalinfo: '+o) if not m else None; v=m.group(1); sys.exit(f'rasterio GDAL {g} != gdalinfo {v} (see README troubleshooting)') if v!=g else print(f'OK: GDAL {g}')",
+] }
 
 ######## Pixi Lint
 

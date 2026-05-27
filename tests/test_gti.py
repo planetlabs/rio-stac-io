@@ -6,10 +6,14 @@ from rasterio import __gdal_version__
 from rasterio.errors import GDALVersionError
 
 import rio_stac_io as stacio
+from rio_stac_io.drivers.gti import _GTI_EXCLUDED_GDAL
+from rio_stac_io.utils import gdal_version_blocked
+
+_GDAL_VERSION = __gdal_version__
 
 
 @pytest.mark.skipif(
-    parse(__gdal_version__) >= parse("3.10.0"),
+    parse(_GDAL_VERSION) >= parse("3.10.0"),
     reason="Using GTI driver works with GDAL version >= 3.10.0",
 )
 def test_open_gti_wrong_version(stac_item_collection):
@@ -21,10 +25,16 @@ def test_open_gti_wrong_version(stac_item_collection):
             ...
 
 
-pytestmark = pytest.mark.skipif(
-    parse(__gdal_version__) < parse("3.10.0"),
-    reason="Using GTI driver works with GDAL version >= 3.10.0",
-)
+pytestmark = [
+    pytest.mark.skipif(
+        parse(_GDAL_VERSION) < parse("3.10.0"),
+        reason="Using GTI driver works with GDAL version >= 3.10.0",
+    ),
+    pytest.mark.skipif(
+        gdal_version_blocked(_GDAL_VERSION, _GTI_EXCLUDED_GDAL),
+        reason="GTI excluded on selected GDAL versions",
+    ),
+]
 
 
 @pytest.mark.parametrize(
@@ -136,6 +146,16 @@ def test_open_gti_no_proj():
 
     with stacio.open(ItemCollection(items), asset_key="data", use_gti=True) as src:
         src.profile
+
+
+@pytest.mark.skipif(
+    not gdal_version_blocked(_GDAL_VERSION, _GTI_EXCLUDED_GDAL),
+    reason="Only applies to GTI-excluded GDAL versions",
+)
+def test_open_gti_blocked_gdal_version(stac_item_collection) -> None:
+    with pytest.raises(GDALVersionError, match="excluded"):
+        with stacio.open(stac_item_collection, asset_key="data", use_gti=True):
+            ...
 
 
 def test_open_gti_empty_ic():

@@ -1,20 +1,28 @@
-from typing import Annotated, Any, Literal, overload
+from __future__ import annotations
+
+import warnings
+from typing import TYPE_CHECKING, Annotated, Any, Literal, overload
 
 import pystac
 import pystac_client
 import rasterio as rio
 from pystac import Item, ItemCollection
 from pystac_client import ItemSearch
+from rasterio.errors import GDALVersionError
 
 from rio_stac_io.drivers.gti import GTIDatasetReader
 from rio_stac_io.drivers.stacit import STACITDatasetReader
 from rio_stac_io.drivers.stacta import STACTADatasetReader
+from rio_stac_io.utils import is_geodataframe
+
+if TYPE_CHECKING:
+    from geopandas import GeoDataFrame
 
 
 @overload
 def open(
     items: Annotated[
-        pystac.ItemCollection | pystac_client.ItemSearch,
+        pystac.ItemCollection | pystac_client.ItemSearch | GeoDataFrame,
         "STAC Items must implement the Projection STAC extension",
     ],
     mode: Literal["r"] = "r",
@@ -26,7 +34,7 @@ def open(
     max_items: int = 1000,
     collection: str | None = None,
     crs: str | None = None,
-    resolution: Literal["AVERAGE", "HIGHEST", "​LOWEST"] = "AVERAGE",
+    resolution: Literal["AVERAGE", "HIGHEST", "LOWEST"] = "AVERAGE",
     overlap_strategy: Literal[
         "REMOVE_IF_NO_NODATA", "USE_ALL", "USE_MOST_RECENT"
     ] = "REMOVE_IF_NO_NODATA",
@@ -94,7 +102,7 @@ def open(
 @overload
 def open(
     items: Annotated[
-        pystac.ItemCollection | pystac_client.ItemSearch,
+        pystac.ItemCollection | pystac_client.ItemSearch | GeoDataFrame,
         "STAC Items must implement the Projection STAC extension",
     ],
     mode: Literal["r"] = "r",
@@ -256,7 +264,7 @@ def open(  # type: ignore[overload-cannot-match]  # passes on macos but not linu
 
 
 def open(
-    items: Item | ItemCollection | ItemSearch,
+    items: Item | ItemCollection | ItemSearch | GeoDataFrame,
     mode: Literal["r"] = "r",
     *,
     asset_key: str,
@@ -266,8 +274,11 @@ def open(
     zoom_level: int | None = None,
     **kwargs: Any,
 ) -> rio.DatasetReader:
-    """rio-stac-io accepts any pystac Item, ItemCollection or ItemSearch
-    and returns a rasterio DatasetReader.
+    """rio-stac-io accepts a pystac `Item`, `ItemCollection` or `ItemSearch`,
+    or a **STAC-compliant** `geopandas.GeoDataFrame` (same item layout as
+    [stac-geoparquet](https://github.com/stac-utils/stac-geoparquet), e.g. from
+    `geopandas.read_parquet` on STAC GeoParquet), and returns a rasterio
+    DatasetReader.
     Input items will be merged into a single layer,
     similar to a VRT and served as a single rasterio Dataset.
     If you need to read time series,
@@ -297,6 +308,16 @@ def open(
     When provided with a single Item as input, it will use the
     STACTA driver if the item uses the tiled-asset STAC extension
     and rasterio when using a regular item.
+
+    For a **STAC-compliant GeoDataFrame**, the flow is different: the **GTI**
+    driver is tried first, then **STACIT** is used if GTI fails (e.g. GDAL
+    without GeoParquet, or GDAL too old for GTI). The **`use_gti` argument is
+    ignored** for GeoDataFrame input. The `merge_collections` and
+    `infer_projection` arguments only apply to the STACIT fallback; on the
+    GTI path GTI always merges across collections and reprojects on the fly,
+    so those flags are no-ops there (a warning is emitted when GTI is
+    selected and a non-default `infer_projection`/`merge_collections` was
+    passed).
 
     See overloaded function signatures for details.
 
@@ -328,5 +349,31 @@ def open(
                 **kwargs,
             )
 
+    elif is_geodataframe(items):
+        # For GeoDataFrame input, first try the GTI driver, then STACIT if GTI
+        # cannot be used: GDAL too old, missing Parquet, etc. (see
+        # GTIDatasetReader and drivers.gti). ImportError is not caught (missing
+        # [gti] extras should fail fast).
+        try:
+            reader = GTIDatasetReader(items, asset_key, **kwargs)
+        except (SystemError, GDALVersionError):
+            return STACITDatasetReader(
+                items,
+                asset_key,
+                merge_collections=merge_collections,
+                infer_projection=infer_projection,
+                **kwargs,
+            )
+
+        if infer_projection or merge_collections:
+            warnings.warn(
+                "GTI always merges items across collections and reprojects on "
+                "the fly; `merge_collections` and `infer_projection` are "
+                "ignored on the GTI path. Pass a GeoDataFrame whose rows are "
+                "all from one collection / projection if you need split "
+                "subdatasets via STACIT.",
+                stacklevel=2,
+            )
+        return reader
     else:
         return rio.open(items, **kwargs)
