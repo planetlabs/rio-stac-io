@@ -30,6 +30,7 @@ class GTIDatasetReader(DatasetReader):
         **profile: Any,
     ) -> None:
         try:
+            import pyarrow as pa
             from geopandas import GeoDataFrame
             from stac_geoparquet.arrow import parse_stac_items_to_arrow
             from stac_geoparquet.arrow._constants import DEFAULT_PARQUET_SCHEMA_VERSION
@@ -62,9 +63,17 @@ class GTIDatasetReader(DatasetReader):
                 _items = item_collection.items
             try:
                 arrow = parse_stac_items_to_arrow(_items)
+                # stac_geoparquet >= 0.8 returns a RecordBatchReader (lazy
+                # stream); materialize to a Table so geopandas's geoarrow
+                # geometry detection works after a prior GTI MemoryFile open
+                # in the same process (extension-type registration race).
+                if isinstance(arrow, pa.RecordBatchReader):
+                    arrow = arrow.read_all()
                 gdf = GeoDataFrame.from_arrow(arrow)
-            except TypeError as e:
-                if "got pyarrow.lib.NullArray" in str(e):
+            except (TypeError, ValueError) as e:
+                if "got pyarrow.lib.NullArray" in str(e) or "No items provided" in str(
+                    e
+                ):
                     raise ValueError(
                         "Cannot open dataset. Got empty ItemCollection."
                     ) from e
