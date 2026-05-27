@@ -33,3 +33,4 @@ repos:
         types: [python]
         entry: mypy --config-file=./pyproject.toml
         exclude: ^tests/
+        require_serial: true
