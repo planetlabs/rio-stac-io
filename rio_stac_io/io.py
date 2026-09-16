@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, Annotated, Any, Literal, overload
+from typing import TYPE_CHECKING, Annotated, Any, Literal, cast, overload
 
 import pystac
 import pystac_client
@@ -376,4 +376,4 @@ def open(
             )
         return reader
     else:
-        return rio.open(items, **kwargs)
+        return cast(rio.DatasetReader, rio.open(items, mode=mode, **kwargs))

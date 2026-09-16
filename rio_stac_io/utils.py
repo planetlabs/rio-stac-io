@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from functools import wraps
-from typing import Any, Callable, Sequence
+from typing import TYPE_CHECKING, Any, Callable, ParamSpec, Sequence, TypeGuard, TypeVar
 
 import rasterio as rio
 from packaging.version import parse
@@ -7,6 +9,12 @@ from pystac import Item
 from pystac.extensions.projection import AssetProjectionExtension
 from rasterio import __gdal_version__
 from rasterio.errors import GDALVersionError
+
+P = ParamSpec("P")
+R = TypeVar("R")
+
+if TYPE_CHECKING:
+    from geopandas import GeoDataFrame
 
 
 def gdal_version_blocked(runtime_version: str, exclude: Sequence[str]) -> bool:
@@ -18,12 +26,12 @@ def require_gdal_version(
     gdal_version: str,
     *,
     exclude: Sequence[str] | None = None,
-) -> Callable:
+) -> Callable[[Callable[P, R]], Callable[P, R]]:
     excluded = tuple(exclude or ())
 
-    def decorator(function: Callable) -> Callable:
+    def decorator(function: Callable[P, R]) -> Callable[P, R]:
         @wraps(function)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             runtime_str = __gdal_version__
             runtime = parse(runtime_str)
 
@@ -45,7 +53,7 @@ def require_gdal_version(
     return decorator
 
 
-def is_geodataframe(obj: object) -> bool:
+def is_geodataframe(obj: object) -> TypeGuard[GeoDataFrame]:
     """True if *obj* is a :class:`geopandas.GeoDataFrame` (or a subclass of it).
 
     The check uses the class MRO and the defining module, so
