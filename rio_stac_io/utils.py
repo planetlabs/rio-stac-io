@@ -105,7 +105,17 @@ def infer_projection_metadata(item: Item, asset_key: str) -> Item:
                 item.assets[asset_key], add_if_missing=True
             )
             asset.bbox = list(src.bounds)
-            asset.transform = list(src.transform)
+            asset.transform = [
+                src.transform.a,
+                src.transform.b,
+                src.transform.c,
+                src.transform.d,
+                src.transform.e,
+                src.transform.f,
+                src.transform.g,
+                src.transform.h,
+                src.transform.i,
+            ]
             asset.shape = [src.height, src.width]
             asset.code = src.crs.to_string()
     return item

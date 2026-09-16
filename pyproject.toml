@@ -18,7 +18,10 @@ gti = ["stac-geoparquet>=0.7.0",]
 
 [tool.pixi.workspace]
 channels = ["conda-forge"]
-platforms = ["osx-arm64", "linux-64"]
+platforms = [
+  { platform = "osx-arm64", macos = "15.0" },
+  { platform = "linux-64" },
+]
 
 [tool.pixi.pypi-options]
 no-binary = ["rasterio"]
@@ -127,6 +130,7 @@ pre-commit = ">=2.19.0"
 types-python-dateutil = ">=2.9.0.20240315"
 types-pytz = ">=2024.1.0.20240203"
 types-requests = ">=2.26.0.20240315"
+types-rasterio = ">=1.5.1"
 
 
 [tool.pixi.feature.lint.tasks]
