@@ -173,7 +173,8 @@ hatch = "*"
 twine = "*"
 
 [tool.pixi.feature.build.tasks]
-build = "pixi project version set $(git describe --tags) && hatch build"
+# hatchling >=1.32.1 writes the version verbatim, so strip the tag's leading v
+build = "pixi project version set $(git describe --tags | sed 's/^v//') && hatch build"
 deploy = { cmd = "twine upload -r planet dist/*", depends-on = ["build"] }
 
 # PYTEST
