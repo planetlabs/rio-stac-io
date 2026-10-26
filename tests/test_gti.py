@@ -1,5 +1,4 @@
 import pytest
-from packaging.version import parse
 from pystac import ItemCollection
 from pystac_client import Client
 from rasterio import __gdal_version__
@@ -7,13 +6,13 @@ from rasterio.errors import GDALVersionError
 
 import rio_stac_io as stacio
 from rio_stac_io.drivers.gti import _GTI_EXCLUDED_GDAL
-from rio_stac_io.utils import gdal_version_blocked
+from rio_stac_io.utils import gdal_version_blocked, parse_version
 
 _GDAL_VERSION = __gdal_version__
 
 
 @pytest.mark.skipif(
-    parse(_GDAL_VERSION) >= parse("3.10.0"),
+    parse_version(_GDAL_VERSION) >= parse_version("3.10.0"),
     reason="Using GTI driver works with GDAL version >= 3.10.0",
 )
 def test_open_gti_wrong_version(stac_item_collection):
@@ -27,7 +26,7 @@ def test_open_gti_wrong_version(stac_item_collection):
 
 pytestmark = [
     pytest.mark.skipif(
-        parse(_GDAL_VERSION) < parse("3.10.0"),
+        parse_version(_GDAL_VERSION) < parse_version("3.10.0"),
         reason="Using GTI driver works with GDAL version >= 3.10.0",
     ),
     pytest.mark.skipif(

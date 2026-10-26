@@ -6,14 +6,18 @@ from contextlib import ExitStack
 from typing import TYPE_CHECKING, Any, Iterable, Literal, cast
 
 import rasterio as rio
-from packaging.version import parse
 from pystac import Item, ItemCollection
 from pystac_client import ItemSearch
 from rasterio import DatasetReader, __gdal_version__
 from rasterio.env import Env, local
 from rasterio.errors import RasterioIOError
 
-from rio_stac_io.utils import infer_projection_metadata, is_geodataframe, vsi_href
+from rio_stac_io.utils import (
+    infer_projection_metadata,
+    is_geodataframe,
+    parse_version,
+    vsi_href,
+)
 
 if TYPE_CHECKING:
     from geopandas import GeoDataFrame
@@ -41,7 +45,7 @@ def rewrite_item(
     # STACIT driver only starts supporting STAC v1.1.0 starting in GDAL v3.10.2
     # For lower versions, we need to substitute the `proj:code` property
     # with the now deprecated `proj:epsg`` property
-    if parse(gdal_version) < parse("3.10.2"):
+    if parse_version(gdal_version) < parse_version("3.10.2"):
         if "proj:code" in item.properties:
             item.properties["proj:epsg"] = int(
                 item.properties["proj:code"].replace("EPSG:", "")
@@ -144,7 +148,7 @@ class STACITDatasetReader(DatasetReader):
 
             href = f'STACIT:"{tmp_path.name}":asset={asset_key}'
 
-            if parse(__gdal_version__) < parse("3.9.1") and (
+            if parse_version(__gdal_version__) < parse_version("3.9.1") and (
                 overlap_strategy == "USE_ALL"
             ):
                 warnings.warn(

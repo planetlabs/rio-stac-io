@@ -12,17 +12,16 @@ driver until the env is clean / cache-free.
 
 import pytest
 import rasterio as rio
-from packaging.version import parse
 from rasterio import __gdal_version__
 from stac_geoparquet import to_geodataframe
 
 import rio_stac_io as stacio
 from rio_stac_io.drivers.gti import _GTI_EXCLUDED_GDAL
-from rio_stac_io.utils import gdal_version_blocked
+from rio_stac_io.utils import gdal_version_blocked, parse_version
 
-_GTI_MIN_GDAL = parse("3.10.0")
+_GTI_MIN_GDAL = parse_version("3.10.0")
 _GDAL_VERSION = __gdal_version__
-_GDAL = parse(_GDAL_VERSION)
+_GDAL = parse_version(_GDAL_VERSION)
 
 
 def _parquet_driver_available() -> bool:
