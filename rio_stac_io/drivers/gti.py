@@ -4,13 +4,12 @@ from contextlib import ExitStack
 from typing import TYPE_CHECKING, Any, Iterable
 
 import rasterio as rio
-from packaging.version import parse
 from pystac import Item, ItemCollection
 from pystac_client import ItemSearch
 from rasterio import DatasetReader, __gdal_version__
 from rasterio.env import Env, local
 
-from rio_stac_io.utils import require_gdal_version, vsi_href
+from rio_stac_io.utils import parse_version, require_gdal_version, vsi_href
 
 # https://github.com/OSGeo/gdal/issues/14674
 _GTI_EXCLUDED_GDAL = ("3.12.2", "3.12.3", "3.12.4")
@@ -89,7 +88,7 @@ class GTIDatasetReader(DatasetReader):
         # GDAL 3.12+ GTI handles gs:// directly; keep those hrefs untouched.
         # For older versions, build a separate frame with /vsi-prefixed hrefs
         # for the parquet payload only — never mutate the caller's GeoDataFrame.
-        if parse(__gdal_version__) < parse("3.12.0"):
+        if parse_version(__gdal_version__) < parse_version("3.12.0"):
             parquet_gdf = gdf.copy()
             parquet_gdf["assets"] = parquet_gdf["assets"].apply(rewrite_href)
         else:

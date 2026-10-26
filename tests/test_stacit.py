@@ -2,17 +2,17 @@ import contextlib
 
 import pytest
 import rasterio as rio
-from packaging.version import parse
 from pystac import ItemCollection
 from pystac_client import Client
 from rasterio import __gdal_version__
 from rasterio.errors import RasterioIOError
 
 import rio_stac_io as stacio
+from rio_stac_io.utils import parse_version
 
 
 @pytest.mark.skipif(
-    parse(__gdal_version__) >= parse("3.10.0"),
+    parse_version(__gdal_version__) >= parse_version("3.10.0"),
     reason="STACIT driver identifies as VRT for GDAL < 3.10.0 only",
 )
 def test_stacit_driver_vrt(stac_item_collection):
@@ -21,7 +21,7 @@ def test_stacit_driver_vrt(stac_item_collection):
 
 
 @pytest.mark.skipif(
-    parse(__gdal_version__) < parse("3.10.0"),
+    parse_version(__gdal_version__) < parse_version("3.10.0"),
     reason="STACIT driver identifies as STACIT for GDAL >= 3.10.0 only",
 )
 def test_stacit_driver_stacit(stac_item_collection):
@@ -115,7 +115,7 @@ def test_open_stacit_search():
 )
 def test_open_stacit_overlap(stac_item_collection_overlap, overlap_strategy, expected):
     # Driver changed in version 3.9.1 and introduced the USE_ALL option
-    if parse(__gdal_version__) < parse("3.9.1"):
+    if parse_version(__gdal_version__) < parse_version("3.9.1"):
         expected = 2
 
     bounds = [0, -16, 16, 16]
